@@ -19,7 +19,7 @@ dotnet add package Bennewitz.Ninja.AssemblyQuality
 
 See [docs/publishing.md](docs/publishing.md). The short version:
 
-1. Add the `NUGET_USER` secret — your nuget.org **profile name**, not an email.
+1. Add the `NUGET_USER` variable — your nuget.org **profile name**, not an email.
 2. Create **one** trusted-publishing policy whose glob patterns cover every id in
    [`packages.push`](packages.push) and match nothing in [`packages.local`](packages.local).
 3. Run **Release** → *Run workflow* with the version **blank**. That logs in and stops, proving the

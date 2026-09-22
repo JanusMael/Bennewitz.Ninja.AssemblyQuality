@@ -14,10 +14,10 @@ The release workflow reads both, so the declaration has exactly one home.
 
 Steps 1 and 2 are account-level and have to be done by the nuget.org account owner.
 
-### 1 · Add the `NUGET_USER` secret
+### 1 · Add the `NUGET_USER` variable
 
 ```bash
-gh secret set NUGET_USER --repo JanusMael/Bennewitz.Ninja.AssemblyQuality
+gh variable set NUGET_USER --repo JanusMael/Bennewitz.Ninja.AssemblyQuality
 ```
 
 It prompts for the value, so it stays out of shell history.
