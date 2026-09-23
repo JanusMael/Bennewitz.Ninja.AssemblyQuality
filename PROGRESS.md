@@ -9,4 +9,4 @@ Unreleased since `v2026.3.922`:
 
 | Commit | Change |
 |---|---|
-| `0200315` | fix(AQ1004): the shadow finding names both fixes — rename the namespace alone, or the assembly and package name with it where namespaces follow the assembly name |
+| `0200315` | fix(AQ1004): the shadow finding names both fixes — rename the namespace alone, or the assembly name with it where namespaces follow the assembly name; the package id may keep the word |

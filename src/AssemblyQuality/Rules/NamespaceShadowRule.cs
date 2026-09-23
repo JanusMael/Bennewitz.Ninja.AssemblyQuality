@@ -31,7 +31,8 @@ namespace Bennewitz.Ninja.AssemblyQuality.Rules;
 /// <para>
 /// ⚠ <b>The message offers two fixes, not one.</b> Where the namespace follows the assembly name
 /// (<c>RootNamespace</c> derived from it), renaming only the namespace breaks that convention — the
-/// fix there renames package, assembly and namespace together, <c>.Avalonia</c> → <c>.AvaloniaUI</c>.
+/// fix there renames assembly and namespace together, <c>.Avalonia</c> → <c>.AvaloniaUI</c>. The
+/// package id takes no part in name resolution, so it may keep <c>.Avalonia</c>.
 /// </para>
 /// </remarks>
 public sealed class NamespaceShadowRule : IAssemblyRule
@@ -86,7 +87,8 @@ public sealed class NamespaceShadowRule : IAssemblyRule
                         + "first and a qualified name through it fails with CS0234 — at the use "
                         + "site, about a type that plainly exists. Rename the segment: in the "
                         + "namespace alone, or, where namespaces follow the assembly name, in the "
-                        + $"assembly and package name as well (e.g. '{segment}UI')."));
+                        + $"assembly name as well (e.g. '{segment}UI'). A package id is not a "
+                        + "namespace and may keep the word."));
                 }
             }
         }

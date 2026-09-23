@@ -104,7 +104,7 @@ public sealed class RuleTests
 
         AssemblyFinding finding = Assert.Single(result.Findings, f => f.Subject.EndsWith(".Shadow.System", StringComparison.Ordinal));
         Assert.Contains("namespace alone", finding.Message, StringComparison.Ordinal);
-        Assert.Contains("assembly and package name", finding.Message, StringComparison.Ordinal);
+        Assert.Contains("assembly name as well", finding.Message, StringComparison.Ordinal);
     }
 
     [Fact]
