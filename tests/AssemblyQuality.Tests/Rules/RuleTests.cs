@@ -93,6 +93,20 @@ public sealed class RuleTests
         Assert.Contains(result.Findings, f => f.Subject.EndsWith(".Shadow.System", StringComparison.Ordinal));
     }
 
+    /// <summary>
+    /// ⚠ The advice must name both fixes. Prescribing the namespace-only rename breaks every
+    /// project whose namespace follows its assembly name — pin the two options, not the sentence.
+    /// </summary>
+    [Fact]
+    public void AShadowFinding_NamesBothFixes()
+    {
+        AssemblyRuleResult result = new NamespaceShadowRule().Analyze(Subjects);
+
+        AssemblyFinding finding = Assert.Single(result.Findings, f => f.Subject.EndsWith(".Shadow.System", StringComparison.Ordinal));
+        Assert.Contains("namespace alone", finding.Message, StringComparison.Ordinal);
+        Assert.Contains("assembly and package name", finding.Message, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void AnAssemblyWithNoShadowingSegment_IsClean()
     {

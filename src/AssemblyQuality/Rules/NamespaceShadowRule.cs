@@ -28,6 +28,11 @@ namespace Bennewitz.Ninja.AssemblyQuality.Rules;
 /// ⛔ <b>This one is invisible until somebody writes the unlucky line.</b> A shadowing segment
 /// compiles perfectly until the first file needs a qualified name through it, which can be years.
 /// </para>
+/// <para>
+/// ⚠ <b>The message offers two fixes, not one.</b> Where the namespace follows the assembly name
+/// (<c>RootNamespace</c> derived from it), renaming only the namespace breaks that convention — the
+/// fix there renames package, assembly and namespace together, <c>.Avalonia</c> → <c>.AvaloniaUI</c>.
+/// </para>
 /// </remarks>
 public sealed class NamespaceShadowRule : IAssemblyRule
 {
@@ -79,8 +84,9 @@ public sealed class NamespaceShadowRule : IAssemblyRule
                         $"The segment '{segment}' shadows the root namespace of a referenced "
                         + $"assembly, so inside this namespace the name '{segment}' resolves here "
                         + "first and a qualified name through it fails with CS0234 — at the use "
-                        + $"site, about a type that plainly exists. Rename the segment; '{segment}' "
-                        + "belongs in the assembly and package name, not the namespace."));
+                        + "site, about a type that plainly exists. Rename the segment: in the "
+                        + "namespace alone, or, where namespaces follow the assembly name, in the "
+                        + $"assembly and package name as well (e.g. '{segment}UI')."));
                 }
             }
         }
