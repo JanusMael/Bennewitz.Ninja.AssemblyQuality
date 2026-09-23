@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Bennewitz.Ninja.AssemblyQuality.Rules;
@@ -44,6 +45,7 @@ public sealed class NamespaceShadowRule : IAssemblyRule
     public string Summary => "No declared namespace segment shadows the root namespace of a referenced assembly.";
 
     /// <inheritdoc />
+    [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     public AssemblyRuleResult Analyze(AssemblyScanContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -114,6 +116,7 @@ public sealed class NamespaceShadowRule : IAssemblyRule
     /// not count toward <see cref="AssemblyRuleResult.Inspected"/> either.
     /// </para>
     /// </remarks>
+    [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     private static HashSet<string> RootNamespacesOf(Assembly assembly)
     {
         HashSet<string> roots = new(StringComparer.Ordinal);

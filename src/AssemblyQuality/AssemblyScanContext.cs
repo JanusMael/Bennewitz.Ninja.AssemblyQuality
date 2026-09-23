@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Bennewitz.Ninja.AssemblyQuality;
@@ -18,6 +19,17 @@ namespace Bennewitz.Ninja.AssemblyQuality;
 /// </remarks>
 public sealed class AssemblyScanContext
 {
+    /// <summary>
+    /// The <see cref="RequiresUnreferencedCodeAttribute"/> message on every reflection entry point.
+    /// </summary>
+    /// <remarks>
+    /// ⛔ <b>Trimming does not break a scan; it makes one lie.</b> The trimmer removes exactly the
+    /// types and references these rules look for, so a trimmed scan completes and under-reports.
+    /// </remarks>
+    internal const string TrimMessage =
+        "Reads exported types and assembly references by reflection. Trimming removes what the "
+        + "rules look for, so a scan in a trimmed application completes and silently under-reports.";
+
     private AssemblyScanContext(IReadOnlyList<Assembly> assemblies)
     {
         Assemblies = assemblies;
@@ -41,6 +53,7 @@ public sealed class AssemblyScanContext
     /// optional dependency would otherwise take the whole scan down, and a rule that cannot run is
     /// a rule nobody keeps.
     /// </remarks>
+    [RequiresUnreferencedCode(TrimMessage)]
     public IEnumerable<(Assembly Assembly, Type Type)> ExportedTypes()
     {
         foreach (Assembly assembly in Assemblies)

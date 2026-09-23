@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Bennewitz.Ninja.AssemblyQuality.Rules;
@@ -53,6 +54,7 @@ public sealed class ForbiddenReferenceRule : IAssemblyRule
     public string Summary => "An assembly references none of the assemblies its layer forbids.";
 
     /// <inheritdoc />
+    [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     public AssemblyRuleResult Analyze(AssemblyScanContext context)
     {
         ArgumentNullException.ThrowIfNull(context);

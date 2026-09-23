@@ -15,6 +15,12 @@ repository, where it could assert "no offenders today" and never that it would f
 dotnet add package Bennewitz.Ninja.AssemblyQuality
 ```
 
+Run it where it belongs: in a test project, against the untrimmed build. The rules read by
+reflection, so they are not trim-safe. `IAssemblyRule.Analyze` carries
+`[RequiresUnreferencedCode]`, so calling it from an application with trimming or AOT enabled
+raises a warning at the call site. Without that warning, a trimmed scan would complete and quietly
+report less than it should.
+
 ## Releasing
 
 See [docs/publishing.md](docs/publishing.md). The short version:

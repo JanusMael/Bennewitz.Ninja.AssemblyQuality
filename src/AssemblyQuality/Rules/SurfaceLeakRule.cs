@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Bennewitz.Ninja.AssemblyQuality.Rules;
@@ -60,6 +61,7 @@ public sealed class SurfaceLeakRule : IAssemblyRule
     public string Summary => "No type from a leak-prone namespace appears in the public surface.";
 
     /// <inheritdoc />
+    [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     public AssemblyRuleResult Analyze(AssemblyScanContext context)
     {
         ArgumentNullException.ThrowIfNull(context);

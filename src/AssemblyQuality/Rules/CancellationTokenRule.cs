@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace Bennewitz.Ninja.AssemblyQuality.Rules;
@@ -37,6 +38,7 @@ public sealed class CancellationTokenRule : IAssemblyRule
     public string Summary => "No public method takes a CancellationToken with a default value.";
 
     /// <inheritdoc />
+    [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     public AssemblyRuleResult Analyze(AssemblyScanContext context)
     {
         ArgumentNullException.ThrowIfNull(context);

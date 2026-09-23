@@ -11,3 +11,4 @@ Unreleased since `v2026.3.922`:
 |---|---|
 | `0200315` | fix(AQ1004): the shadow finding names both fixes — rename the namespace alone, or the assembly name with it where namespaces follow the assembly name |
 | `7db0478` | fix(AQ1004): the package id is not a namespace and may keep the shadowing word |
+| _pending_ | feat: trim analyzers on (`IsAotCompatible`); `IAssemblyRule.Analyze`, every rule's `Analyze` and `AssemblyScanContext.ExportedTypes` carry `[RequiresUnreferencedCode]` — a public API change |

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Bennewitz.Ninja.AssemblyQuality;
 
 /// <summary>One assembly quality rule.</summary>
@@ -17,6 +19,11 @@ namespace Bennewitz.Ninja.AssemblyQuality;
 /// the thing a consumer actually binds against. A source analyser sees what was written; this sees
 /// what was published, including everything a generator added.
 /// </para>
+/// <para>
+/// ⚠ <b>Not trim-safe, and marked so.</b> <see cref="Analyze"/> carries
+/// <see cref="RequiresUnreferencedCodeAttribute"/>, so a caller in a trimmed application is warned
+/// at the call site. Every implementation must carry it too; the analyzer rejects one that does not.
+/// </para>
 /// </remarks>
 public interface IAssemblyRule
 {
@@ -30,6 +37,7 @@ public interface IAssemblyRule
     string Summary { get; }
 
     /// <summary>Examine the scanned assemblies and report every violation found.</summary>
+    [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     AssemblyRuleResult Analyze(AssemblyScanContext context);
 }
 

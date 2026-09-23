@@ -9,5 +9,9 @@
     <Description>Static analysis rules for the shape a .NET assembly ships: cancellation contracts, implementation types leaking through the public surface, layering the reference list can prove, and namespace segments that shadow a dependency's root and fail with CS0234 at the use site. Rules report findings and an inspected count rather than asserting, so a consumer picks the runner and the severity. The assembly-shaped companion to Bennewitz.Ninja.XamlQuality.</Description>
     <PackageTags>static-analysis;reflection;public-api;api-surface;architecture;layering;cancellation;namespaces;quality;testing</PackageTags>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Runs the trim, AOT and single-file analyzers; TreatWarningsAsErrors makes them binding.
+         The library is NOT trim-safe and cannot be: every reflection entry point says so with
+         [RequiresUnreferencedCode] instead, and this is what keeps a new one from going unmarked. -->
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 </Project>
