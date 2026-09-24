@@ -22,8 +22,8 @@ gh variable set NUGET_USER --repo JanusMael/Bennewitz.Ninja.AssemblyQuality
 
 It prompts for the value, so it stays out of shell history.
 
-⛔ **The value is the nuget.org PROFILE NAME, not an email address.** An email is accepted by the
-secret store and then fails at login, where the error points at the policy rather than at the value.
+⛔ **The value is the nuget.org PROFILE NAME, not an email address.** An email is accepted as the
+variable's value and then fails at login, where the error points at the policy rather than at the value.
 
 ⛔ **It is the profile name of whoever CREATED the policy**, which is not always whoever owns the
 package. They differ whenever a policy is created under an organization.

@@ -1,7 +1,18 @@
-# AGENTS.md
+# AGENTS.md — AssemblyQuality
 
-Guidance for coding agents working in this repository. Read [README.md](README.md) for what the
-library does; this file covers how to change it.
+> For anyone changing this repository, human or agent: how to change it without breaking what it
+> promises. Each top-level directory has an `AGENTS.md` of its own for what only its files show.
+> Work state is [`PROGRESS.md`](PROGRESS.md). What every repository in this family carries, and how
+> it is checked, is prescribed in
+> [`docs/repository-conventions.md`](https://github.com/JanusMael/Bennewitz.Ninja.Templates/blob/main/docs/repository-conventions.md)
+> in Bennewitz.Ninja.Templates.
+
+## What this repository is
+
+`Bennewitz.Ninja.AssemblyQuality`: static analysis rules for the shape a .NET assembly ships, read
+by reflection over the compiled output rather than from source. The assembly-shaped companion to
+Bennewitz.Ninja.XamlQuality, which reads markup. [README.md](README.md) describes each rule for a
+consumer; this file covers how to change them.
 
 ## Commands
 
