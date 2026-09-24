@@ -21,6 +21,23 @@ reflection, so they are not trim-safe. `IAssemblyRule.Analyze` carries
 raises a warning at the call site. Without that warning, a trimmed scan would complete and quietly
 report less than it should.
 
+## Trusting a clean result
+
+On its own, a rule with no findings says less than it seems to. Together, these three checks make
+it mean something:
+
+| Check | What it rules out |
+|---|---|
+| `Inspected > 0` | The rule had nothing it could check, not "checked and clean". |
+| `Skipped` is empty | The rule examined only what it could load, not everything. |
+| A check that fails on the wrong assembly | The rules ran against whatever they were handed, not the assembly you meant. |
+
+The first two describe the scan, and both pass when the scan is pointed at the wrong assembly.
+Before running the rules, pin the subject by asserting something that is true only of it, such as
+a dependency only it references, or one its neighbours carry and it must not. A helper that loads an
+assembly by name and then checks that the name matches does not do this: it passes for whatever it
+loaded.
+
 ## Releasing
 
 See [docs/publishing.md](docs/publishing.md). The short version:
