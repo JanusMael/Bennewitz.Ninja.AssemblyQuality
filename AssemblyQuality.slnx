@@ -5,4 +5,8 @@
   <Folder Name="/tests/">
     <Project Path="tests/AssemblyQuality.Tests/AssemblyQuality.Tests.csproj" />
   </Folder>
+  <Folder Name="/tests/fixtures/">
+    <Project Path="tests/fixtures/Absent/Absent.csproj" />
+    <Project Path="tests/fixtures/Orphan/Orphan.csproj" />
+  </Folder>
 </Solution>

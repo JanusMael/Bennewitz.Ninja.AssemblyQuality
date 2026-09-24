@@ -58,4 +58,17 @@ public sealed record AssemblyRuleResult(IReadOnlyList<AssemblyFinding> Findings,
 {
     /// <summary>A result for a rule that examined things and found nothing wrong.</summary>
     public static AssemblyRuleResult Clean(int inspected) => new([], inspected);
+
+    /// <summary>
+    /// What the rule could not examine, one line each: a reference that would not load, a type
+    /// whose signature names an assembly that is not there.
+    /// </summary>
+    /// <remarks>
+    /// ⭐ <b>Empty means the answer is complete.</b> A rule skips what it cannot load rather than
+    /// failing the whole scan, and <see cref="Inspected"/> cannot say which parts it never saw — a
+    /// scan missing one dependency still counts everything else. A consumer that needs the answer
+    /// to be whole asserts this is empty; one that accepts a partial answer can at least read what
+    /// it was partial about.
+    /// </remarks>
+    public IReadOnlyList<string> Skipped { get; init; } = [];
 }

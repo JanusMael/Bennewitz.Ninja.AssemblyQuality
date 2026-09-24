@@ -54,21 +54,34 @@ public sealed class AssemblyScanContext
     /// a rule nobody keeps.
     /// </remarks>
     [RequiresUnreferencedCode(TrimMessage)]
-    public IEnumerable<(Assembly Assembly, Type Type)> ExportedTypes()
+    public IEnumerable<(Assembly Assembly, Type Type)> ExportedTypes() => ExportedTypes(null);
+
+    /// <summary>
+    /// <see cref="ExportedTypes()"/>, recording in <paramref name="skipped"/> any assembly whose
+    /// types only partly loaded.
+    /// </summary>
+    [RequiresUnreferencedCode(TrimMessage)]
+    internal IEnumerable<(Assembly Assembly, Type Type)> ExportedTypes(ICollection<string>? skipped)
     {
         foreach (Assembly assembly in Assemblies)
         {
-            Type[] types;
-            try
+            foreach (Type type in Load(assembly, publicOnly: true, skipped))
             {
-                types = assembly.GetExportedTypes();
+                yield return (assembly, type);
             }
-            catch (ReflectionTypeLoadException ex)
-            {
-                types = [.. ex.Types.OfType<Type>().Where(t => t.IsPublic || t.IsNestedPublic)];
-            }
+        }
+    }
 
-            foreach (Type type in types)
+    /// <summary>
+    /// Every type in the scan, public and internal alike, recording partial loads in
+    /// <paramref name="skipped"/>.
+    /// </summary>
+    [RequiresUnreferencedCode(TrimMessage)]
+    internal IEnumerable<(Assembly Assembly, Type Type)> AllTypes(ICollection<string>? skipped)
+    {
+        foreach (Assembly assembly in Assemblies)
+        {
+            foreach (Type type in Load(assembly, publicOnly: false, skipped))
             {
                 yield return (assembly, type);
             }
@@ -88,14 +101,14 @@ public sealed class AssemblyScanContext
     /// exactly that.
     /// </para>
     /// <para>
-    /// ⚠ <b>A reference that will not load is skipped, not guessed at</b>, so the set can be partial
-    /// or empty. A rule comparing against it must count nothing it compared against an empty set:
-    /// that comparison could never have produced a finding, and counting it is how a rule with
-    /// nothing to look at reports the same healthy number as a clean one.
+    /// ⚠ <b>A reference that will not load is skipped, not guessed at</b>, and recorded in
+    /// <paramref name="skipped"/> so the rule's result can say what its answer is missing. A rule
+    /// comparing against this set must also count nothing it compared against an empty one: that
+    /// comparison could never have produced a finding.
     /// </para>
     /// </remarks>
     [RequiresUnreferencedCode(TrimMessage)]
-    internal static HashSet<string> ReferencedNamespaces(Assembly assembly)
+    internal static HashSet<string> ReferencedNamespaces(Assembly assembly, ICollection<string> skipped)
     {
         HashSet<string> namespaces = new(StringComparer.Ordinal);
 
@@ -108,10 +121,20 @@ public sealed class AssemblyScanContext
             }
             catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or BadImageFormatException)
             {
+                skipped.Add($"{assembly.GetName().Name}: reference {reference.Name} {reference.Version} "
+                    + $"would not load ({ex.GetType().Name}), so nothing it exports was compared against.");
                 continue;
             }
 
-            foreach ((Assembly _, Type type) in Of(referenced).ExportedTypes())
+            foreach ((Assembly _, Type type) in Of(referenced).ExportedTypes(skipped))
+            {
+                if (type.Namespace is { Length: > 0 } ns)
+                {
+                    namespaces.Add(ns);
+                }
+            }
+
+            foreach (Type type in Forwarded(referenced, skipped))
             {
                 if (type.Namespace is { Length: > 0 } ns)
                 {
@@ -121,5 +144,60 @@ public sealed class AssemblyScanContext
         }
 
         return namespaces;
+    }
+
+    /// <summary>
+    /// The public types <paramref name="assembly"/> forwards elsewhere.
+    /// </summary>
+    /// <remarks>
+    /// ⛔ <b>A facade exports nothing and forwards everything.</b> At run time <c>System.Runtime</c>
+    /// holds no types of its own — each is forwarded to CoreLib — so reading exported types alone
+    /// finds no <c>System</c> root behind the one reference nearly every assembly has. Measured: an
+    /// assembly referencing only <c>System.Runtime</c> had nothing to compare against at all.
+    /// </remarks>
+    [RequiresUnreferencedCode(TrimMessage)]
+    private static Type[] Forwarded(Assembly assembly, ICollection<string> skipped)
+    {
+        try
+        {
+            return [.. assembly.GetForwardedTypes().Where(t => t.IsPublic || t.IsNestedPublic)];
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            skipped.Add($"{assembly.GetName().Name}: {ex.Types.Count(t => t is null)} forwarded type(s) would not "
+                + $"load ({ex.LoaderExceptions.FirstOrDefault()?.Message ?? "no loader message"}), so they were not "
+                + "compared against.");
+            return [.. ex.Types.OfType<Type>().Where(t => t.IsPublic || t.IsNestedPublic)];
+        }
+    }
+
+    /// <summary>
+    /// Whether <paramref name="exception"/> is a load failure a rule should record and step past
+    /// rather than let take the scan down.
+    /// </summary>
+    internal static bool IsLoadFailure(Exception exception) =>
+        exception is FileNotFoundException or FileLoadException or BadImageFormatException or TypeLoadException;
+
+    /// <summary>
+    /// A record of one type a rule could not read, because something its members name will not load.
+    /// </summary>
+    internal static string Unreadable(Type type, Exception exception) =>
+        $"{type.Assembly.GetName().Name}: {type.FullName} could not be read ({exception.GetType().Name}: "
+        + $"{exception.Message}), so its members were not examined.";
+
+    [RequiresUnreferencedCode(TrimMessage)]
+    private static Type[] Load(Assembly assembly, bool publicOnly, ICollection<string>? skipped)
+    {
+        try
+        {
+            return publicOnly ? assembly.GetExportedTypes() : assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException ex)
+        {
+            Type[] loaded = [.. ex.Types.OfType<Type>().Where(t => !publicOnly || t.IsPublic || t.IsNestedPublic)];
+            skipped?.Add($"{assembly.GetName().Name}: {ex.Types.Count(t => t is null)} type(s) would not load "
+                + $"({ex.LoaderExceptions.FirstOrDefault()?.Message ?? "no loader message"}), so they were not examined.");
+            return loaded;
+        }
     }
 }

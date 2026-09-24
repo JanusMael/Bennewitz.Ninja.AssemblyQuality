@@ -30,7 +30,9 @@ namespace Bennewitz.Ninja.AssemblyQuality.Rules;
 /// signature can name a type only from the assembly itself or from one it directly references.
 /// When none of those exports a covered namespace, the predicate cannot be satisfied and the
 /// assembly contributes zero — so the default set over an assembly that references no JSON library
-/// reports that it asked nothing, rather than thousands of slots walked past.
+/// reports that it asked nothing, rather than thousands of slots walked past. A reference that
+/// would not load, or a type whose signatures name one, is listed in
+/// <see cref="AssemblyRuleResult.Skipped"/> instead of taking the scan down.
 /// </para>
 /// </remarks>
 public sealed class SurfaceLeakRule : IAssemblyRule
@@ -90,42 +92,58 @@ public sealed class SurfaceLeakRule : IAssemblyRule
         ArgumentNullException.ThrowIfNull(context);
 
         List<AssemblyFinding> findings = [];
+        List<string> skipped = [];
         int inspected = 0;
 
         foreach (Assembly assembly in context.Assemblies)
         {
-            if (!CanLeak(assembly))
+            if (!CanLeak(assembly, skipped))
             {
                 continue;
             }
 
-            foreach ((Assembly owner, Type type) in AssemblyScanContext.Of(assembly).ExportedTypes())
+            foreach ((Assembly owner, Type type) in AssemblyScanContext.Of(assembly).ExportedTypes(skipped))
             {
-                foreach (MemberInfo member in type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly))
+                // ⚠ Read the whole type before counting any of it. A signature naming an assembly
+                // that will not load throws part-way through, and a type half-counted is a number
+                // that matches neither what was examined nor what was not.
+                (MemberInfo Member, Type Used)[] slots;
+                try
                 {
-                    foreach (Type used in SignatureTypes(member))
+                    slots =
+                    [
+                        .. type.GetMembers(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)
+                            .SelectMany(member => SignatureTypes(member).Select(used => (member, used))),
+                    ];
+                }
+                catch (Exception ex) when (AssemblyScanContext.IsLoadFailure(ex))
+                {
+                    skipped.Add(AssemblyScanContext.Unreadable(type, ex));
+                    continue;
+                }
+
+                foreach ((MemberInfo member, Type used) in slots)
+                {
+                    inspected++;
+
+                    if (Offender(used) is not { } offender)
                     {
-                        inspected++;
-
-                        if (Offender(used) is not { } offender)
-                        {
-                            continue;
-                        }
-
-                        findings.Add(new AssemblyFinding(
-                            Id,
-                            owner.GetName().Name ?? "?",
-                            $"{type.FullName}.{member.Name}",
-                            $"This member's signature names {offender.FullName}, so every consumer binds "
-                            + "against that package whether they use it or not, and replacing it later "
-                            + "becomes a breaking change to an API that was never about it. Expose your "
-                            + "own type instead."));
+                        continue;
                     }
+
+                    findings.Add(new AssemblyFinding(
+                        Id,
+                        owner.GetName().Name ?? "?",
+                        $"{type.FullName}.{member.Name}",
+                        $"This member's signature names {offender.FullName}, so every consumer binds "
+                        + "against that package whether they use it or not, and replacing it later "
+                        + "becomes a breaking change to an API that was never about it. Expose your "
+                        + "own type instead."));
                 }
             }
         }
 
-        return new AssemblyRuleResult(findings, inspected);
+        return new AssemblyRuleResult(findings, inspected) { Skipped = [.. skipped.Distinct(StringComparer.Ordinal)] };
     }
 
     /// <summary>
@@ -133,18 +151,19 @@ public sealed class SurfaceLeakRule : IAssemblyRule
     /// assembly itself, or in one it directly references.
     /// </summary>
     [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
-    private bool CanLeak(Assembly assembly)
+    private bool CanLeak(Assembly assembly, ICollection<string> skipped)
     {
         if (_namespaces.Length == 0)
         {
             return false;
         }
 
-        IEnumerable<string> own = AssemblyScanContext.Of(assembly).ExportedTypes()
-            .Select(pair => pair.Type.Namespace)
-            .OfType<string>();
+        // ⚠ The references are read in full, never short-circuited: one that will not load has to
+        // reach Skipped even when an earlier one already answered the question.
+        HashSet<string> reachable = AssemblyScanContext.ReferencedNamespaces(assembly, skipped);
 
-        return own.Concat(AssemblyScanContext.ReferencedNamespaces(assembly)).Any(Covered);
+        return reachable.Any(Covered)
+            || AssemblyScanContext.Of(assembly).ExportedTypes().Any(pair => pair.Type.Namespace is { } ns && Covered(ns));
     }
 
     private static string[] Distinct(IEnumerable<string> namespaces) =>

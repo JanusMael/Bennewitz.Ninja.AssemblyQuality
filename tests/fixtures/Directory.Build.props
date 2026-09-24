@@ -1,0 +1,13 @@
+<Project>
+  <!-- Fixture assemblies the rule tests reflect over: ordinary libraries, not test projects.
+       MSBuild applies only the CLOSEST Directory.Build.props, so this file keeps
+       tests/Directory.Build.props (xunit, OutputType Exe) away from them and imports the
+       repository root's settings explicitly. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../../'))" />
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- A fixture's missing XML docs are noise. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+</Project>

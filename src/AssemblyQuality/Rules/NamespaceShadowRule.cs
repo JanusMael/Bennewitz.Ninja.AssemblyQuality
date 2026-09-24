@@ -37,24 +37,41 @@ namespace Bennewitz.Ninja.AssemblyQuality.Rules;
 /// </para>
 /// <para>
 /// ⭐ <b><see cref="AssemblyRuleResult.Inspected"/> counts comparisons that could have fired.</b>
-/// A segment is counted only when the assembly has referenced roots to compare it against. An
-/// assembly whose references all failed to load contributes zero, so "nothing to compare against"
-/// can be told apart from "compared and clean". A PARTIAL load still counts: the rule sees the
-/// references that loaded and cannot say which ones did not.
+/// A segment is counted only when the assembly has referenced roots to compare it against, so an
+/// assembly whose references all failed to load contributes zero. A reference that would not load
+/// is named in <see cref="AssemblyRuleResult.Skipped"/>, which is how a PARTIAL load shows: the
+/// count covers the references that loaded, and Skipped lists the ones that did not.
 /// </para>
 /// <para>
-/// ⚠ <b>Namespaces of public types only.</b> The shadow bites internal code just as hard, since it
-/// is a compile-time failure inside the declaring assembly. A namespace holding only internal types
-/// is not examined, so a hand-rolled guard over all types is stronger here.
+/// ⚠ <b>Public types by default; <see cref="IncludingInternalTypes"/> for all of them.</b> The shadow
+/// is a compile-time failure inside the declaring assembly, so it bites internal code exactly as
+/// hard as public code. The default follows the rest of this library in reading only what a
+/// consumer can see; a namespace holding only internal types is examined only by the opt-in.
 /// </para>
 /// </remarks>
 public sealed class NamespaceShadowRule : IAssemblyRule
 {
+    private readonly bool _includeInternal;
+
+    /// <summary>Examines the namespaces of public types.</summary>
+    public NamespaceShadowRule()
+        : this(includeInternal: false)
+    {
+    }
+
+    private NamespaceShadowRule(bool includeInternal)
+    {
+        _includeInternal = includeInternal;
+    }
+
     /// <inheritdoc />
     public string Id => "AQ1004";
 
     /// <inheritdoc />
     public string Summary => "No declared namespace segment shadows the root namespace of a referenced assembly.";
+
+    /// <summary>Examines the namespaces of every type, public and internal alike.</summary>
+    public static NamespaceShadowRule IncludingInternalTypes() => new(includeInternal: true);
 
     /// <inheritdoc />
     [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
@@ -63,11 +80,12 @@ public sealed class NamespaceShadowRule : IAssemblyRule
         ArgumentNullException.ThrowIfNull(context);
 
         List<AssemblyFinding> findings = [];
+        List<string> skipped = [];
         int inspected = 0;
 
         foreach (Assembly assembly in context.Assemblies)
         {
-            HashSet<string> roots = RootNamespacesOf(assembly);
+            HashSet<string> roots = RootNamespacesOf(assembly, skipped);
 
             // ⛔ Nothing to compare against means nothing was checked. Counting these segments
             // anyway reports the same number as a clean scan — the inertness Inspected exists to
@@ -78,8 +96,9 @@ public sealed class NamespaceShadowRule : IAssemblyRule
             }
 
             HashSet<string> reported = new(StringComparer.Ordinal);
+            AssemblyScanContext single = AssemblyScanContext.Of(assembly);
 
-            foreach ((Assembly owner, Type type) in AssemblyScanContext.Of(assembly).ExportedTypes())
+            foreach ((Assembly owner, Type type) in _includeInternal ? single.AllTypes(skipped) : single.ExportedTypes(skipped))
             {
                 if (type.Namespace is not { } ns)
                 {
@@ -115,18 +134,18 @@ public sealed class NamespaceShadowRule : IAssemblyRule
             }
         }
 
-        return new AssemblyRuleResult(findings, inspected);
+        return new AssemblyRuleResult(findings, inspected) { Skipped = [.. skipped.Distinct(StringComparer.Ordinal)] };
     }
 
     /// <summary>
     /// The first segment of every namespace a referenced assembly actually exports.
     /// </summary>
     [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
-    private static HashSet<string> RootNamespacesOf(Assembly assembly)
+    private static HashSet<string> RootNamespacesOf(Assembly assembly, ICollection<string> skipped)
     {
         HashSet<string> roots = new(StringComparer.Ordinal);
 
-        foreach (string ns in AssemblyScanContext.ReferencedNamespaces(assembly))
+        foreach (string ns in AssemblyScanContext.ReferencedNamespaces(assembly, skipped))
         {
             roots.Add(ns.Split('.')[0]);
         }

@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Compiled against by Orphan and never copied beside it: the reference that will not load. -->
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Absent</AssemblyName>
+  </PropertyGroup>
+</Project>

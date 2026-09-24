@@ -3,4 +3,15 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AssemblyQuality\AssemblyQuality.csproj" />
   </ItemGroup>
+
+  <!-- Orphan is built but NOT referenced, and only its own dll is copied, into orphan/. Absent,
+       which Orphan references, therefore exists nowhere this process can load it from — a real
+       missing dependency for the coverage tests, not a simulated one. -->
+  <ItemGroup>
+    <ProjectReference Include="..\fixtures\Orphan\Orphan.csproj" ReferenceOutputAssembly="false" />
+    <None Include="..\fixtures\Orphan\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.Orphan.dll"
+          Link="orphan\AssemblyQuality.Fixtures.Orphan.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
 </Project>

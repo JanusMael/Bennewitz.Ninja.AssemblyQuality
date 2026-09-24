@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Orphan</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private="false": compiled against, never copied into this output. At run time the
+         reference exists in metadata and will not load, which is the only faithful subject for
+         a rule meeting a dependency that is not there. -->
+    <ProjectReference Include="..\Absent\Absent.csproj" Private="false" />
+  </ItemGroup>
+</Project>
