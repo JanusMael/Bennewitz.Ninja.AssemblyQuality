@@ -1,0 +1,21 @@
+{
+  "description": "Static analysis rules for the shape a .NET assembly ships: cancellation contracts, implementation types leaking through the public surface, layering the reference list can prove, and namespace segments that shadow a dependency's root. The assembly-shaped companion to Bennewitz.Ninja.XamlQuality.",
+  "homepage": "",
+  "topics": [
+    "api-surface",
+    "architecture",
+    "csharp",
+    "dotnet",
+    "layering",
+    "nuget",
+    "public-api",
+    "reflection",
+    "static-analysis"
+  ],
+  "requiredChecks": [
+    "build",
+    "pack"
+  ],
+  "content": [],
+  "undocumented": {}
+}
