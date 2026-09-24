@@ -18,6 +18,9 @@ public sealed class RuleTests
     private static AssemblyScanContext Subjects =>
         AssemblyScanContext.Of(typeof(Fixtures.Offender).Assembly);
 
+    private static AssemblyScanContext Library =>
+        AssemblyScanContext.Of(typeof(IAssemblyRule).Assembly);
+
     [Fact]
     public void ADefaultedCancellationToken_IsReported()
     {
@@ -26,6 +29,19 @@ public sealed class RuleTests
         Assert.Contains(result.Findings, f => f.Subject.Contains("Defaulted", StringComparison.Ordinal));
         Assert.DoesNotContain(result.Findings, f => f.Subject.Contains(".Required", StringComparison.Ordinal));
         Assert.True(result.Inspected >= 2, "both tokens must be inspected, not just the offending one");
+    }
+
+    /// <summary>
+    /// ⛔ The fix that satisfies the letter and defeats the point: the default moved one overload
+    /// over. Without this the rule reads zero findings on exactly the shape its remarks forbid.
+    /// </summary>
+    [Fact]
+    public void ATokenlessOverloadOfATokenedSibling_IsReported()
+    {
+        AssemblyRuleResult result = new CancellationTokenRule().Analyze(Subjects);
+
+        Assert.Contains(result.Findings, f => f.Subject.EndsWith("Overloaded.Build(left, options)", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.Findings, f => f.Subject.Contains("Overloaded.Parse", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -61,6 +77,38 @@ public sealed class RuleTests
 
         Assert.True(covered.Findings.Count > ignored.Findings.Count,
             "a namespace passed by the consumer must widen the rule");
+    }
+
+    [Fact]
+    public void Only_ReplacesTheDefaultSet()
+    {
+        AssemblyRuleResult result = SurfaceLeakRule.Only(["AssemblyQuality.Tests.Fixtures"]).Analyze(Subjects);
+
+        Assert.Contains(result.Findings, f => f.Subject.EndsWith("Clean.Fine", StringComparison.Ordinal));
+        Assert.DoesNotContain(result.Findings, f => f.Subject.EndsWith(".Leaked", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// ⭐ A leak set nothing in reach exports cannot fire, and must say so with zero rather than a
+    /// large count of slots walked past — the number a consumer asserting on Inspected would trust.
+    /// </summary>
+    [Fact]
+    public void ALeakSetNothingInReachExports_ReportsThatItInspectedNothing()
+    {
+        Assert.DoesNotContain(
+            typeof(IAssemblyRule).Assembly.GetReferencedAssemblies(),
+            reference => reference.Name is "System.Text.Json" or "Newtonsoft.Json");
+
+        AssemblyRuleResult unreachable = new SurfaceLeakRule().Analyze(Library);
+        AssemblyRuleResult empty = SurfaceLeakRule.Only([]).Analyze(Subjects);
+
+        Assert.Empty(unreachable.Findings);
+        Assert.Equal(0, unreachable.Inspected);
+        Assert.Equal(0, empty.Inspected);
+
+        // ⚠ And where a leak IS possible the rule still counts, or this passes on a rule that has
+        // stopped counting anything.
+        Assert.True(new SurfaceLeakRule().Analyze(Subjects).Inspected > 0);
     }
 
     [Fact]
@@ -110,11 +158,29 @@ public sealed class RuleTests
     [Fact]
     public void AnAssemblyWithNoShadowingSegment_IsClean()
     {
-        AssemblyRuleResult result = new NamespaceShadowRule()
-            .Analyze(AssemblyScanContext.Of(typeof(IAssemblyRule).Assembly));
+        AssemblyRuleResult result = new NamespaceShadowRule().Analyze(Library);
 
         Assert.Empty(result.Findings);
         Assert.True(result.Inspected > 0, "the library's own namespaces must actually be inspected");
+    }
+
+    /// <summary>
+    /// ⛔ With no referenced roots to compare against, no segment could shadow anything, and the
+    /// rule must report zero rather than the count of segments it walked past. Otherwise a scan
+    /// whose references all failed to load reads exactly like a clean one.
+    /// </summary>
+    [Fact]
+    public void AnAssemblyWithNoReferencedRoots_ReportsThatItComparedNothing()
+    {
+        // CoreLib references nothing, and has plenty of multi-segment namespaces: the same empty
+        // comparison set a scan gets when every reference fails to load.
+        Assembly coreLib = typeof(object).Assembly;
+        Assert.Empty(coreLib.GetReferencedAssemblies());
+
+        AssemblyRuleResult result = new NamespaceShadowRule().Analyze(AssemblyScanContext.Of(coreLib));
+
+        Assert.Empty(result.Findings);
+        Assert.Equal(0, result.Inspected);
     }
 
     /// <summary>⚠ A rule handed no assemblies reports nothing AND says it inspected nothing.</summary>

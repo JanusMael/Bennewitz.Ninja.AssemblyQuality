@@ -74,4 +74,52 @@ public sealed class AssemblyScanContext
             }
         }
     }
+
+    /// <summary>
+    /// Every namespace exported by an assembly that <paramref name="assembly"/> directly references.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// ⛔ <b>NOT the referenced assemblies' names.</b> That shortcut looks sound — and is, for
+    /// framework assemblies where <c>Avalonia.dll</c> holds <c>Avalonia.*</c> — but it is wrong
+    /// wherever a project names assemblies and namespaces differently on purpose. A repository that
+    /// ships assembly <c>Widgets.Core</c> under namespace <c>Acme.Widgets.Core</c> exports nothing
+    /// called <c>Widgets</c>. Measured: the shortcut fired on a real library whose convention is
+    /// exactly that.
+    /// </para>
+    /// <para>
+    /// ⚠ <b>A reference that will not load is skipped, not guessed at</b>, so the set can be partial
+    /// or empty. A rule comparing against it must count nothing it compared against an empty set:
+    /// that comparison could never have produced a finding, and counting it is how a rule with
+    /// nothing to look at reports the same healthy number as a clean one.
+    /// </para>
+    /// </remarks>
+    [RequiresUnreferencedCode(TrimMessage)]
+    internal static HashSet<string> ReferencedNamespaces(Assembly assembly)
+    {
+        HashSet<string> namespaces = new(StringComparer.Ordinal);
+
+        foreach (AssemblyName reference in assembly.GetReferencedAssemblies())
+        {
+            Assembly referenced;
+            try
+            {
+                referenced = Assembly.Load(reference);
+            }
+            catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or BadImageFormatException)
+            {
+                continue;
+            }
+
+            foreach ((Assembly _, Type type) in Of(referenced).ExportedTypes())
+            {
+                if (type.Namespace is { Length: > 0 } ns)
+                {
+                    namespaces.Add(ns);
+                }
+            }
+        }
+
+        return namespaces;
+    }
 }

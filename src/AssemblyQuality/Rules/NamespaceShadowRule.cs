@@ -35,6 +35,18 @@ namespace Bennewitz.Ninja.AssemblyQuality.Rules;
 /// fix there renames assembly and namespace together, <c>.Avalonia</c> → <c>.AvaloniaUI</c>. The
 /// package id takes no part in name resolution, so it may keep <c>.Avalonia</c>.
 /// </para>
+/// <para>
+/// ⭐ <b><see cref="AssemblyRuleResult.Inspected"/> counts comparisons that could have fired.</b>
+/// A segment is counted only when the assembly has referenced roots to compare it against. An
+/// assembly whose references all failed to load contributes zero, so "nothing to compare against"
+/// can be told apart from "compared and clean". A PARTIAL load still counts: the rule sees the
+/// references that loaded and cannot say which ones did not.
+/// </para>
+/// <para>
+/// ⚠ <b>Namespaces of public types only.</b> The shadow bites internal code just as hard, since it
+/// is a compile-time failure inside the declaring assembly. A namespace holding only internal types
+/// is not examined, so a hand-rolled guard over all types is stronger here.
+/// </para>
 /// </remarks>
 public sealed class NamespaceShadowRule : IAssemblyRule
 {
@@ -56,6 +68,14 @@ public sealed class NamespaceShadowRule : IAssemblyRule
         foreach (Assembly assembly in context.Assemblies)
         {
             HashSet<string> roots = RootNamespacesOf(assembly);
+
+            // ⛔ Nothing to compare against means nothing was checked. Counting these segments
+            // anyway reports the same number as a clean scan — the inertness Inspected exists to
+            // expose.
+            if (roots.Count == 0)
+            {
+                continue;
+            }
 
             HashSet<string> reported = new(StringComparer.Ordinal);
 
@@ -101,45 +121,14 @@ public sealed class NamespaceShadowRule : IAssemblyRule
     /// <summary>
     /// The first segment of every namespace a referenced assembly actually exports.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// ⛔ <b>NOT the referenced assembly's name.</b> That shortcut looks sound — and is, for
-    /// framework assemblies where <c>Avalonia.dll</c> holds <c>Avalonia.*</c> — but it is wrong
-    /// wherever a project names assemblies and namespaces differently on purpose. A repository that
-    /// ships assembly <c>Widgets.Core</c> under namespace <c>Acme.Widgets.Core</c> has no root
-    /// called <c>Widgets</c>, and the shortcut reports a shadow of something that does not exist.
-    /// Measured: it fired on a real library whose convention is exactly that.
-    /// </para>
-    /// <para>
-    /// ⚠ <b>A reference that will not load is skipped, not guessed at.</b> That means this rule can
-    /// under-report, which is the failure mode worth being loudest about — so skipped references do
-    /// not count toward <see cref="AssemblyRuleResult.Inspected"/> either.
-    /// </para>
-    /// </remarks>
     [RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]
     private static HashSet<string> RootNamespacesOf(Assembly assembly)
     {
         HashSet<string> roots = new(StringComparer.Ordinal);
 
-        foreach (AssemblyName reference in assembly.GetReferencedAssemblies())
+        foreach (string ns in AssemblyScanContext.ReferencedNamespaces(assembly))
         {
-            Assembly referenced;
-            try
-            {
-                referenced = Assembly.Load(reference);
-            }
-            catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or BadImageFormatException)
-            {
-                continue;
-            }
-
-            foreach ((Assembly _, Type type) in AssemblyScanContext.Of(referenced).ExportedTypes())
-            {
-                if (type.Namespace?.Split('.') is [string root, ..] && root.Length > 0)
-                {
-                    roots.Add(root);
-                }
-            }
+            roots.Add(ns.Split('.')[0]);
         }
 
         return roots;

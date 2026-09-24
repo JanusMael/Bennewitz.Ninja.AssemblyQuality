@@ -24,6 +24,24 @@ public sealed class Offender
     public Task<JsonNode?> LeakedNested() => Task.FromResult<JsonNode?>(null);
 }
 
+/// <summary>
+/// AQ1001: the overload pair that answers a defaulted-token finding without fixing it.
+/// </summary>
+public sealed class Overloaded
+{
+    /// <summary>Exists only to omit the token — reported.</summary>
+    public void Build(int left, string? options = null) => Build(left, options, CancellationToken.None);
+
+    /// <summary>The token is required here, so this one is correct on its own.</summary>
+    public void Build(int left, string? options, CancellationToken token) { }
+
+    /// <summary>Same name, a different operation: not a shorter spelling of the sibling below.</summary>
+    public void Parse(Stream source) { }
+
+    /// <summary>Takes a token; the overload above is not its abbreviation.</summary>
+    public void Parse(string text, CancellationToken token) { }
+}
+
 /// <summary>A type with nothing wrong with it.</summary>
 public sealed class Clean
 {

@@ -44,7 +44,9 @@ public interface IAssemblyRule
 /// <summary>What a rule found, and how much it looked at.</summary>
 /// <param name="Findings">Every violation, in discovery order.</param>
 /// <param name="Inspected">
-/// How many candidate members, types or references the rule actually examined.
+/// How many candidate members, types or references the rule actually examined — counting only
+/// candidates that could have produced a finding. A rule whose predicate cannot be satisfied (a
+/// forbidden set nothing in reach exports, no referenced roots to compare against) reports zero.
 /// <para>
 /// ⭐ <b>The number that tells "nothing is wrong" apart from "nothing was checked".</b> A rule
 /// given no assemblies, or one whose configuration names nothing, returns zero findings and looks
