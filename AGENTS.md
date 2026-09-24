@@ -39,7 +39,7 @@ These are the same steps CI runs ([.github/workflows/ci.yml](.github/workflows/c
 
 | Path | What it holds |
 |---|---|
-| `src/AssemblyQuality/` | The library: `IAssemblyRule`, `AssemblyRuleResult`, `AssemblyScanContext`, and `Rules/` |
+| `src/AssemblyQuality/` | The library, file by file in [src/AGENTS.md](src/AGENTS.md) |
 | `tests/AssemblyQuality.Tests/` | xunit v3 tests; `Fixtures/` holds real types that break the rules |
 | `tests/fixtures/` | Fixture assemblies the tests reflect over. They have their own `Directory.Build.props`, so they are plain libraries, not test projects |
 | `packages.push` / `packages.local` | Which package ids publish and which must never publish. `PackagingTests` fails on any packable project listed in neither |

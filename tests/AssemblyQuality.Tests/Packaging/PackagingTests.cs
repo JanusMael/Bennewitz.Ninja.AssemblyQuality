@@ -131,6 +131,68 @@ public sealed class PackagingTests
     }
 
     /// <summary>
+    /// The release refuses to run with <c>NUGET_USER</c> unset, and fails rather than skipping.
+    /// </summary>
+    /// <remarks>
+    /// ⛔ <b>The push is gated on <c>NUGET_USER</c>; the GitHub release is not.</b> Without this step a
+    /// tag with the variable unset skips the push and still creates a release page: a green run
+    /// and no package. The preflight test above passes with this step deleted, which is why it is
+    /// pinned on its own.
+    /// </remarks>
+    [Fact]
+    public void The_release_refuses_to_run_without_NUGET_USER()
+    {
+        string workflow = ReleaseWorkflow();
+        string step = Step(workflow, "Refuse to release without NUGET_USER");
+
+        Assert.Contains("env.RELEASING == 'true'", step, StringComparison.Ordinal);
+        Assert.Contains("env.NUGET_USER == ''", step, StringComparison.Ordinal);
+        Assert.Contains("exit 1", step, StringComparison.Ordinal);
+        AssertBeforeThePush(workflow, "Refuse to release without NUGET_USER");
+    }
+
+    /// <summary>
+    /// The release refuses to run from a repository the family conventions reject, in the
+    /// preflight as well as on a tag.
+    /// </summary>
+    /// <remarks>
+    /// ⚠ <b>Ungated on purpose.</b> A condition on <c>RELEASING</c> would skip it in the preflight,
+    /// which is the run meant to find problems before a tag makes anything permanent.
+    /// </remarks>
+    [Fact]
+    public void The_release_refuses_to_run_from_a_repository_the_conventions_reject()
+    {
+        string workflow = ReleaseWorkflow();
+        string step = Step(workflow, "Refuse to release a repository the conventions reject");
+
+        Assert.Contains("repo-conventions.cs -- check --release", step, StringComparison.Ordinal);
+        Assert.DoesNotContain("if:", step, StringComparison.Ordinal);
+        AssertBeforeThePush(workflow, "Refuse to release a repository the conventions reject");
+    }
+
+    /// <summary>
+    /// One step's text, from its <c>- name:</c> line to the next step's.
+    /// </summary>
+    private static string Step(string workflow, string name)
+    {
+        string header = "- name: " + name;
+        int from = workflow.IndexOf(header, StringComparison.Ordinal);
+        Assert.True(from >= 0, "The release workflow has no step named '" + name + "'.");
+
+        int to = workflow.IndexOf("- name:", from + header.Length, StringComparison.Ordinal);
+        return to < 0 ? workflow[from..] : workflow[from..to];
+    }
+
+    /// <summary>A refusal that runs after the push refuses nothing.</summary>
+    private static void AssertBeforeThePush(string workflow, string name)
+    {
+        int refusal = workflow.IndexOf("- name: " + name, StringComparison.Ordinal);
+        int push = workflow.IndexOf("dotnet nuget push", StringComparison.Ordinal);
+
+        Assert.True(push >= 0 && refusal < push, "'" + name + "' must run before dotnet nuget push.");
+    }
+
+    /// <summary>
     /// Comment lines are dropped before searching, because the comments above the publishing steps
     /// explain the very glob these tests forbid — a whole-file search would fail on the explanation.
     /// </summary>
