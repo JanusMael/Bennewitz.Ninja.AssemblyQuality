@@ -23,7 +23,7 @@ Unreleased since `v2026.3.922`:
 | `d147dba`, `b9711a3` | ci: `scripts/repo-conventions.cs` evaluates every project against the family's build properties. CI only |
 | `e9f63e1` | build: `.github/repository.json` requires trimming, and `TrimmableTests` reads the `IsTrimmable` mark off the compiled assembly; `repo-conventions` and the test each fail if `IsAotCompatible` goes. Nothing a package carries changes |
 | `bdd4bef` | ci: `scripts/repo-conventions.cs` is the template's current copy (Templates `fb6961a`). CI only |
-| _pending_ | feat!: rule IDs `AQ1001`–`AQ1004` are now `BNAQ1001`–`BNAQ1004`. Breaking for any suppression by the old IDs |
+| `0deb5c3` | feat!: rule IDs `AQ1001`–`AQ1004` are now `BNAQ1001`–`BNAQ1004`. Breaking for any suppression by the old IDs |
 
 ## Decisions
 
