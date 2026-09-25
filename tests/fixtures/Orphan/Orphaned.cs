@@ -1,6 +1,7 @@
 // The `Absent` segment here shadows the root of a referenced assembly — the BNAQ1004 defect — and
 // the rule cannot see it, because that assembly never loads and its root never reaches the
-// comparison. What the rule CAN do is say so. `global::` below is the scar the shadow forces.
+// comparison. What the rule CAN do is say so. BNCQ1004, the source-side analyzer in
+// Bennewitz.Ninja.CodeQuality, does report it: at compile time the reference is there. `global::` below is the scar the shadow forces.
 namespace Orphan.Absent;
 
 /// <summary>Readable: nothing in its signatures is missing.</summary>

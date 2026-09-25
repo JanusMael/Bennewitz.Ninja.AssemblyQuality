@@ -85,3 +85,43 @@ the runner and the severity for them.
 forbid nothing, returns zero findings and reads exactly like a clean result. `Inspected` is what
 tells "nothing is wrong" apart from "nothing was checked" — which is the failure every guard this
 library replaced actually had.
+
+**Source-side counterparts.** Three of these rules also exist as Roslyn analyzers in
+[Bennewitz.Ninja.CodeQuality](https://github.com/JanusMael/Bennewitz.Ninja.CodeQuality), with the same
+number under the `BNCQ` prefix. The analyzer reports at the line as it is typed and reads the source,
+internal code included. This package reads what actually shipped, including everything a source
+generator added. Where you can, run both: each sees something the other cannot.
+
+### BNAQ1001
+
+No public method takes a `CancellationToken` with a default value, and no public method is a
+token-less overload of a sibling that takes one. A policy rule rather than a defect rule, so adopt it
+deliberately. Counterpart: [`BNCQ1001`](https://github.com/JanusMael/Bennewitz.Ninja.CodeQuality#bncq1001),
+off by default, which also reads protected methods and constructors.
+
+### BNAQ1002
+
+No type from a leak-prone namespace appears in a public signature, generic arguments unwrapped.
+`new SurfaceLeakRule(extra)` adds namespaces to `LeakProneNamespaces`; `SurfaceLeakRule.Only(list)`
+replaces them. Counterpart: [`BNCQ1002`](https://github.com/JanusMael/Bennewitz.Ninja.CodeQuality#bncq1002),
+which walks referenced types transitively and also reads generic constraints and a containing type's
+type arguments, such as `List<JsonNode>.Enumerator`. This rule reads signature types only.
+
+### BNAQ1003
+
+No assembly directly references one its layer forbids, matched by simple-name prefix. It forbids
+nothing until configured, and then says so with `Inspected` of zero. There is no source-side
+counterpart: `Microsoft.CodeAnalysis.BannedApiAnalyzers` already reports a forbidden use at its call
+site, while this rule reads the reference list the compiled assembly actually kept.
+
+### BNAQ1004
+
+No namespace segment after the first shadows the root namespace of a referenced assembly.
+`NamespaceShadowRule.IncludingInternalTypes()` extends it from public types to all of them.
+Counterpart: [`BNCQ1004`](https://github.com/JanusMael/Bennewitz.Ninja.CodeQuality#bncq1004).
+
+⚠ **A reference that does not load at run time is invisible here and visible there.** This rule
+compares against the roots of references it can load, and names any it cannot in `Skipped`. The
+analyzer runs where the compiler has every reference. Measured on this repository's own fixtures:
+`BNCQ1004` reports the `Orphan.Absent` shadow in `tests/fixtures/Orphan`, whose referenced assembly
+is deliberately missing at run time, while `BNAQ1004` lists that reference in `Skipped`.

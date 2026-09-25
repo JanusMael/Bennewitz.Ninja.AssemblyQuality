@@ -89,6 +89,21 @@ public sealed class RulesCatalogTests
         Assert.Equal(rendered, ExtractRegion(readme), ignoreLineEndingDifferences: true);
     }
 
+    /// <summary>
+    /// ⚠ Every rule has a <c>### {Id}</c> heading in the README. CodeQuality links each source-side
+    /// counterpart to that anchor, so a rule without one is a link that lands on nothing.
+    /// </summary>
+    [Fact]
+    public void EveryRule_HasAReadmeSectionOfItsOwn()
+    {
+        string[] headings = [.. File.ReadLines(ReadmePath()).Select(line => line.TrimEnd())];
+
+        foreach (IAssemblyRule rule in DiscoverRules())
+        {
+            Assert.Contains("### " + rule.Id, headings);
+        }
+    }
+
     private static string Render()
     {
         IEnumerable<string> rows = DiscoverRules()

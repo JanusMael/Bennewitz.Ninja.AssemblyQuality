@@ -33,20 +33,14 @@ Unreleased since `v2026.3.922`:
 
 | Decision | Why |
 |---|---|
-| **Rule IDs are `BN` + the product's initials, with the rule number kept**: `BNAQ` here, `BNXQ` for XamlQuality, `BNCQ` for the planned CodeQuality analyzers | An analyzer's ID shares one flat namespace with every analyzer a project loads (`#pragma`, `NoWarn`, `.editorconfig`), and a two-letter prefix is the likeliest to collide. Four letters is unique enough and short enough to type; where a rule comes from is also shown by `helpLinkUri`, `Category` and the package id, so the ID need not spell it out |
+| **Rule IDs are `BN` + the product's initials, with the rule number kept**: `BNAQ` here, `BNXQ` for XamlQuality, `BNCQ` for the CodeQuality analyzers | An analyzer's ID shares one flat namespace with every analyzer a project loads (`#pragma`, `NoWarn`, `.editorconfig`), and a two-letter prefix is the likeliest to collide. Four letters is unique enough and short enough to type; where a rule comes from is also shown by `helpLinkUri`, `Category` and the package id, so the ID need not spell it out |
 | **A prefix never changes once one ID in it has shipped** | Every rename breaks consumers' suppressions. `AQ` → `BNAQ` is the one exception, taken while only `2026.3.922` was published and used only as a test dependency |
 | **XamlQuality is asked to move to `BNXQ`** in its next release | One scheme across the family. Sent to the XamlQuality session on 2026-09-25; the rename is its to ship |
 
-## Next
+## Related
 
-**Bennewitz.Ninja.CodeQuality**, a new repository for Roslyn analyzers, decided 2026-09-25. Its
-decisions move into that repository once it exists:
-
-| Decision | Choice |
-|---|---|
-| Source | A clean-room rewrite. Analyzers written for another project are reference only; none of that code is copied |
-| Scope | Analyzers only. Code generators go elsewhere, e.g. beside Bennewitz.Ninja.AutoVersioning |
-| Base class | A self-scoping `DiagnosticAnalyzer` base, internal to the analyzer assembly: a sealed `Initialize`, a scope gate that cannot register actions, and a test that every analyzer derives from it |
-| Scaffolding | Generate with `bbpkg`, adapt `src/` and `tests/` to an analyzer (`netstandard2.0`, `IsRoslynComponent`, packed under `analyzers/dotnet/cs`, Roslyn analyzer testing), release it, then upstream the proven shape to Bennewitz.Ninja.Templates as a third template beside `bbpkg` and `bbavalonia` |
-| First rules | Source-side counterparts of `BNAQ1004` (namespace shadow), `BNAQ1001` (cancellation token, opt-in) and `BNAQ1002` (surface leak, with a transitive member walk). Not `BNAQ1003`: `BannedApiAnalyzers` already covers a forbidden use site |
-| IDs | `BNCQ`, each rule cross-linked to its `BNAQ` counterpart in both READMEs |
+[Bennewitz.Ninja.CodeQuality](https://github.com/JanusMael/Bennewitz.Ninja.CodeQuality) holds the
+source-side analyzers `BNCQ1001`, `BNCQ1002` and `BNCQ1004`, first published as `2026.3.925`. Its
+decisions live in its own `PROGRESS.md`. Each `BNAQ` rule's README section links its counterpart, and
+`RulesCatalogTests.EveryRule_HasAReadmeSectionOfItsOwn` keeps those anchors in place for CodeQuality's
+links back.
