@@ -95,6 +95,28 @@ public sealed class CoverageTests
         }
     }
 
+    /// <summary>
+    /// ⛔ Regression: a public type whose BASE class is in a missing assembly makes
+    /// <c>GetExportedTypes()</c> throw <see cref="FileNotFoundException"/>, not a
+    /// <see cref="ReflectionTypeLoadException"/>. Every rule must still run, name the gap in
+    /// <c>Skipped</c>, and examine the types that did load.
+    /// </summary>
+    [Fact]
+    public void AnAssemblyWithATypeThatCannotLoad_IsScannedNotFatal()
+    {
+        Assert.Throws<FileNotFoundException>(() => Orphan.GetExportedTypes());
+
+        foreach (IAssemblyRule rule in RulesCatalogTests.DiscoverRules().Where(r => r is not ForbiddenReferenceRule))
+        {
+            AssemblyRuleResult result = rule.Analyze(Orphaned);
+            Assert.Contains(result.Skipped, s => s.Contains("AssemblyQuality.Fixtures.Orphan", StringComparison.Ordinal)
+                && s.Contains("would not load", StringComparison.Ordinal));
+        }
+
+        // The loadable types were still examined: Readable's token is counted.
+        Assert.True(new CancellationTokenRule().Analyze(Orphaned).Inspected > 0);
+    }
+
     /// <summary>⭐ A scan with every dependency present says its answer is whole.</summary>
     [Fact]
     public void AScanWithEverythingPresent_SkipsNothing()

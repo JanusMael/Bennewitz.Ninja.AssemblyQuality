@@ -185,6 +185,18 @@ public sealed class AssemblyScanContext
         $"{type.Assembly.GetName().Name}: {type.FullName} could not be read ({exception.GetType().Name}: "
         + $"{exception.Message}), so its members were not examined.";
 
+    /// <summary>
+    /// The types of <paramref name="assembly"/>, public only or all, with any that will not load
+    /// recorded in <paramref name="skipped"/> rather than thrown.
+    /// </summary>
+    /// <remarks>
+    /// ⛔ <b><c>GetExportedTypes()</c> does not fail the way <c>GetTypes()</c> does.</b> When a public
+    /// type's BASE class lives in an assembly that will not load, it throws
+    /// <see cref="FileNotFoundException"/> and returns nothing, where <c>GetTypes()</c> throws a
+    /// <see cref="ReflectionTypeLoadException"/> carrying every type that did load. So a load failure
+    /// from the first is answered by asking the second and keeping its public types. Measured: view
+    /// models deriving from a missing <c>CommunityToolkit.Mvvm</c> took every rule's scan down.
+    /// </remarks>
     [RequiresUnreferencedCode(TrimMessage)]
     private static Type[] Load(Assembly assembly, bool publicOnly, ICollection<string>? skipped)
     {
@@ -194,10 +206,25 @@ public sealed class AssemblyScanContext
         }
         catch (ReflectionTypeLoadException ex)
         {
-            Type[] loaded = [.. ex.Types.OfType<Type>().Where(t => !publicOnly || t.IsPublic || t.IsNestedPublic)];
-            skipped?.Add($"{assembly.GetName().Name}: {ex.Types.Count(t => t is null)} type(s) would not load "
-                + $"({ex.LoaderExceptions.FirstOrDefault()?.Message ?? "no loader message"}), so they were not examined.");
-            return loaded;
+            return Partial(assembly, ex, publicOnly, skipped);
         }
+        catch (Exception ex) when (publicOnly && IsLoadFailure(ex))
+        {
+            try
+            {
+                return [.. assembly.GetTypes().Where(t => t.IsPublic || t.IsNestedPublic)];
+            }
+            catch (ReflectionTypeLoadException partial)
+            {
+                return Partial(assembly, partial, publicOnly, skipped);
+            }
+        }
+    }
+
+    private static Type[] Partial(Assembly assembly, ReflectionTypeLoadException ex, bool publicOnly, ICollection<string>? skipped)
+    {
+        skipped?.Add($"{assembly.GetName().Name}: {ex.Types.Count(t => t is null)} type(s) would not load "
+            + $"({ex.LoaderExceptions.FirstOrDefault()?.Message ?? "no loader message"}), so they were not examined.");
+        return [.. ex.Types.OfType<Type>().Where(t => !publicOnly || t.IsPublic || t.IsNestedPublic)];
     }
 }

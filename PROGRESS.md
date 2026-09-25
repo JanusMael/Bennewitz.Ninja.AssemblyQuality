@@ -2,8 +2,14 @@
 
 ## Next release
 
-Nothing unreleased since `v2026.3.925`. The version comes from the tag, set from the date when the
-maintainer gives the go; see [docs/publishing.md](docs/publishing.md).
+The version comes from the tag, set from the date when the maintainer gives the go; see
+[docs/publishing.md](docs/publishing.md). One release per calendar day: `2026.3.925` is taken.
+
+Unreleased since `v2026.3.925`:
+
+| Commit | Change |
+|---|---|
+| _pending_ | fix: a public type whose base class is in a missing assembly no longer takes the scan down. `GetExportedTypes()` throws `FileNotFoundException` there instead of `ReflectionTypeLoadException`, which escaped the skip handling in every type-reading rule; the loadable types are now examined and the rest named in `Skipped`. Found by ScopedEditors adopting `2026.3.925` (view models deriving from `CommunityToolkit.Mvvm`) |
 
 ## Last release
 
