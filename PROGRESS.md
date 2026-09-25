@@ -10,6 +10,10 @@ maintainer gives the go, and nothing is tagged before that. The version comes fr
 (see Decisions). A consumer's suppressions by the old IDs stop matching, so the release notes carry
 the old and new IDs side by side.
 
+**Once it is published**, message the Templates session (or open an issue in
+`JanusMael/Bennewitz.Ninja.Templates`) with the version. `bbavalonia` pins `2026.3.922` and names the
+old IDs in its tests; it bumps the pin and renames them in one change, and waits on this to do it.
+
 Unreleased since `v2026.3.922`:
 
 | Commit | Change |
