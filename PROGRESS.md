@@ -17,3 +17,4 @@ Unreleased since `v2026.3.922`:
 | `ad75b45` | build: `IsContinuousIntegration` is gone and AutoVersioning is `2026.3.916` (`plans/00004` in Bennewitz.Ninja.Templates). Build only |
 | `d147dba`, `b9711a3` | ci: `scripts/repo-conventions.cs` evaluates every project against the family's build properties. CI only |
 | `build: trimming is required` | build: `.github/repository.json` requires trimming, and `TrimmableTests` reads the `IsTrimmable` mark off the compiled assembly; `repo-conventions` and the test each fail if `IsAotCompatible` goes. Nothing a package carries changes |
+| `ci: the nuget topic only where packages.push names an id` | ci: `scripts/repo-conventions.cs` is the template's current copy (Templates `fb6961a`). CI only |
