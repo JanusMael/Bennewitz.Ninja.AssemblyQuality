@@ -102,3 +102,12 @@ These are the same steps CI runs ([.github/workflows/ci.yml](.github/workflows/c
   version comes from that tag. **A published NuGet version can never be replaced**, so never push a
   tag without the maintainer's explicit go-ahead. Setup, the credential preflight and failure modes
   are in [docs/publishing.md](docs/publishing.md).
+
+## Avalonia and drivable-UI lessons
+
+Avalonia foot-guns and lessons about desktop UIs an agent can drive and verify go to
+XamlQuality, not here. `docs/avalonia-gotchas.md` and `docs/ai-drivable-ui.md` in
+[JanusMael/Bennewitz.Ninja.XamlQuality](https://github.com/JanusMael/Bennewitz.Ninja.XamlQuality)
+are the one living copy of each. Send a new finding or a correction to the XamlQuality session
+by message, with the versions and the measurement or source behind it, or open an issue in that
+repository when no session is running. Keep no copy here.
