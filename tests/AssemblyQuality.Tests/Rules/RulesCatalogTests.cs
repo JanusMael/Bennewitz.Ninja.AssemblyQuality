@@ -35,6 +35,20 @@ public sealed class RulesCatalogTests
         Assert.Equal(ids.Length, ids.Distinct(StringComparer.Ordinal).Count());
     }
 
+    /// <summary>
+    /// ⛔ Every id is <c>BNAQ</c> and four digits: the family scheme, <c>BN</c> plus the product's
+    /// initials. The prefix is frozen once an id has shipped, because a consumer's suppression is
+    /// keyed on it, so a rule added under any other prefix fails here rather than in a release.
+    /// </summary>
+    [Fact]
+    public void EveryRuleId_CarriesTheFamilyPrefix()
+    {
+        foreach (IAssemblyRule rule in DiscoverRules())
+        {
+            Assert.Matches(@"^BNAQ\d{4}$", rule.Id);
+        }
+    }
+
     [Fact]
     public void EveryRule_SummarisesWhatItRequires()
     {
