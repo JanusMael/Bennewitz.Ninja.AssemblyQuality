@@ -48,7 +48,7 @@ public sealed class ForbiddenReferenceRule : IAssemblyRule
     }
 
     /// <inheritdoc />
-    public string Id => "AQ1003";
+    public string Id => "BNAQ1003";
 
     /// <inheritdoc />
     public string Summary => "An assembly references none of the assemblies its layer forbids.";

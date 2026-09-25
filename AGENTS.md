@@ -91,7 +91,7 @@ These are the same steps CI runs ([.github/workflows/ci.yml](.github/workflows/c
 - The root namespace is `Bennewitz.Ninja.<ProjectName>`. Assembly names stay unprefixed
   (`AssemblyQuality`); the package id carries the prefix.
 - Finding messages state the defect, why it bites, and every valid fix. Never prescribe one fix when
-  a common convention needs a different one (see AQ1004's two renames).
+  a common convention needs a different one (see BNAQ1004's two renames).
 
 ## Commits and releases
 

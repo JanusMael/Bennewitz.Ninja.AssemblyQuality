@@ -69,7 +69,7 @@ public sealed class SurfaceLeakRule : IAssemblyRule
     }
 
     /// <inheritdoc />
-    public string Id => "AQ1002";
+    public string Id => "BNAQ1002";
 
     /// <inheritdoc />
     public string Summary => "No type from a leak-prone namespace appears in the public surface.";

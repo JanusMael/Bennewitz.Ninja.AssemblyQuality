@@ -65,7 +65,7 @@ public sealed class NamespaceShadowRule : IAssemblyRule
     }
 
     /// <inheritdoc />
-    public string Id => "AQ1004";
+    public string Id => "BNAQ1004";
 
     /// <inheritdoc />
     public string Summary => "No declared namespace segment shadows the root namespace of a referenced assembly.";

@@ -62,11 +62,16 @@ MIT. See [LICENSE](LICENSE).
 <!-- BEGIN GENERATED RULES -->
 | Id | Requires |
 |---|---|
-| `AQ1001` | No public method takes a CancellationToken with a default value. |
-| `AQ1002` | No type from a leak-prone namespace appears in the public surface. |
-| `AQ1003` | An assembly references none of the assemblies its layer forbids. |
-| `AQ1004` | No declared namespace segment shadows the root namespace of a referenced assembly. |
+| `BNAQ1001` | No public method takes a CancellationToken with a default value. |
+| `BNAQ1002` | No type from a leak-prone namespace appears in the public surface. |
+| `BNAQ1003` | An assembly references none of the assemblies its layer forbids. |
+| `BNAQ1004` | No declared namespace segment shadows the root namespace of a referenced assembly. |
 <!-- END GENERATED RULES -->
+
+**Renamed after `2026.3.922`.** Up to and including that version the IDs were `AQ1001`–`AQ1004`.
+The numbers are unchanged, so `AQ1004` is now `BNAQ1004`: rename any suppression or filter that
+names an old ID, or it stops matching. The prefix is `BN` plus the product's initials, shared across
+the Bennewitz.Ninja quality packages, and it will not change again.
 
 The table above is rendered from the rule types — `Id` and `Summary` on each `IAssemblyRule` — and
 a test fails if it drifts. Regenerate it with `AQ_UPDATE_DOCS=1 dotnet test AssemblyQuality.slnx`

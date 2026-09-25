@@ -46,7 +46,7 @@ namespace Bennewitz.Ninja.AssemblyQuality.Rules;
 public sealed class CancellationTokenRule : IAssemblyRule
 {
     /// <inheritdoc />
-    public string Id => "AQ1001";
+    public string Id => "BNAQ1001";
 
     /// <inheritdoc />
     public string Summary => "No public method takes a CancellationToken with a default value.";

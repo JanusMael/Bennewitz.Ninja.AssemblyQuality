@@ -1,4 +1,4 @@
-// The `Absent` segment here shadows the root of a referenced assembly — the AQ1004 defect — and
+// The `Absent` segment here shadows the root of a referenced assembly — the BNAQ1004 defect — and
 // the rule cannot see it, because that assembly never loads and its root never reaches the
 // comparison. What the rule CAN do is say so. `global::` below is the scar the shadow forces.
 namespace Orphan.Absent;
@@ -6,7 +6,7 @@ namespace Orphan.Absent;
 /// <summary>Readable: nothing in its signatures is missing.</summary>
 public sealed class Readable
 {
-    /// <summary>A required token, so AQ1001 has something to count here.</summary>
+    /// <summary>A required token, so BNAQ1001 has something to count here.</summary>
     public int Value(CancellationToken token) => 0;
 }
 

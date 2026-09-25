@@ -11,21 +11,21 @@ namespace AssemblyQuality.Tests.Fixtures;
 /// </remarks>
 public sealed class Offender
 {
-    /// <summary>AQ1001: the defaulted token.</summary>
+    /// <summary>BNAQ1001: the defaulted token.</summary>
     public void Defaulted(CancellationToken token = default) { }
 
-    /// <summary>AQ1001: the same parameter, required — this one is correct.</summary>
+    /// <summary>BNAQ1001: the same parameter, required — this one is correct.</summary>
     public void Required(CancellationToken token) { }
 
-    /// <summary>AQ1002: a leaked serializer type.</summary>
+    /// <summary>BNAQ1002: a leaked serializer type.</summary>
     public JsonNode? Leaked() => null;
 
-    /// <summary>AQ1002: the same leak, wrapped — a shape that fools an outer-type-only check.</summary>
+    /// <summary>BNAQ1002: the same leak, wrapped — a shape that fools an outer-type-only check.</summary>
     public Task<JsonNode?> LeakedNested() => Task.FromResult<JsonNode?>(null);
 }
 
 /// <summary>
-/// AQ1001: the overload pair that answers a defaulted-token finding without fixing it.
+/// BNAQ1001: the overload pair that answers a defaulted-token finding without fixing it.
 /// </summary>
 public sealed class Overloaded
 {

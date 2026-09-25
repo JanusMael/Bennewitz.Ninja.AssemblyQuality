@@ -51,10 +51,10 @@ public sealed class RulesCatalogTests
         // ⚠ Every other test here passes over an empty catalogue.
         IReadOnlyList<IAssemblyRule> rules = DiscoverRules();
 
-        Assert.Contains(rules, rule => rule.Id == "AQ1001");
-        Assert.Contains(rules, rule => rule.Id == "AQ1002");
-        Assert.Contains(rules, rule => rule.Id == "AQ1003");
-        Assert.Contains(rules, rule => rule.Id == "AQ1004");
+        Assert.Contains(rules, rule => rule.Id == "BNAQ1001");
+        Assert.Contains(rules, rule => rule.Id == "BNAQ1002");
+        Assert.Contains(rules, rule => rule.Id == "BNAQ1003");
+        Assert.Contains(rules, rule => rule.Id == "BNAQ1004");
     }
 
     [Fact]

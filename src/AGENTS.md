@@ -9,10 +9,10 @@ root [AGENTS.md](../AGENTS.md); this file names where each part of it lives.
 | `IAssemblyRule.cs` | `IAssemblyRule` (`Id`, `Summary`, `Analyze`) and `AssemblyRuleResult` (`Findings`, `Inspected`, `Skipped`, `Clean`) |
 | `AssemblyFinding.cs` | One violation: `RuleId`, `AssemblyName`, `Subject`, `Message`. No line number, because metadata carries none |
 | `AssemblyScanContext.cs` | The assemblies a scan covers (`Of`, `ExportedTypes`), plus the internal helpers rules share: `AllTypes`, `ReferencedNamespaces`, `IsLoadFailure`, `Unreadable`, `TrimMessage` |
-| `Rules/CancellationTokenRule.cs` | `AQ1001`: no public method takes a defaulted `CancellationToken`, nor is a token-less overload of a sibling that takes one. A policy rule, not a defect rule |
-| `Rules/SurfaceLeakRule.cs` | `AQ1002`: no type from a leak-prone namespace in the public surface, generic arguments unwrapped. Defaults to `LeakProneNamespaces`; `Only(...)` replaces the set |
-| `Rules/ForbiddenReferenceRule.cs` | `AQ1003`: no direct reference whose simple name starts with a forbidden prefix. No default set, so unconfigured it inspects nothing |
-| `Rules/NamespaceShadowRule.cs` | `AQ1004`: no namespace segment after the first shadows a referenced assembly's root. Public types by default; `IncludingInternalTypes()` widens it |
+| `Rules/CancellationTokenRule.cs` | `BNAQ1001`: no public method takes a defaulted `CancellationToken`, nor is a token-less overload of a sibling that takes one. A policy rule, not a defect rule |
+| `Rules/SurfaceLeakRule.cs` | `BNAQ1002`: no type from a leak-prone namespace in the public surface, generic arguments unwrapped. Defaults to `LeakProneNamespaces`; `Only(...)` replaces the set |
+| `Rules/ForbiddenReferenceRule.cs` | `BNAQ1003`: no direct reference whose simple name starts with a forbidden prefix. No default set, so unconfigured it inspects nothing |
+| `Rules/NamespaceShadowRule.cs` | `BNAQ1004`: no namespace segment after the first shadows a referenced assembly's root. Public types by default; `IncludingInternalTypes()` widens it |
 
 ## Rules
 
@@ -26,5 +26,5 @@ root [AGENTS.md](../AGENTS.md); this file names where each part of it lives.
 | Referenced roots come from `AssemblyScanContext.ReferencedNamespaces`, which includes forwarded types | `System.Runtime` is a facade that exports nothing | `CoverageTests.ARootReachableOnlyThroughAFacade_IsComparedAgainst` |
 | Every reflection entry point carries `[RequiresUnreferencedCode(AssemblyScanContext.TrimMessage)]` | `IsAotCompatible` turns on the trim analyzers and warnings are errors, so an unmarked one fails the build | `AssemblyQuality.csproj`, `IsAotCompatible` |
 | `SurfaceLeakRule.LeakProneNamespaces` grows only deliberately | Adding a namespace changes findings for every consumer; growth belongs at the call site | `SurfaceLeakRule` remarks |
-| The library references neither `System.Text.Json` nor `Newtonsoft.Json`, and none of its own namespaces shadows a referenced root | The tests use this assembly as the clean subject for `AQ1002` and `AQ1004` | `RuleTests.ALeakSetNothingInReachExports_ReportsThatItInspectedNothing`, `AnAssemblyWithNoShadowingSegment_IsClean` |
+| The library references neither `System.Text.Json` nor `Newtonsoft.Json`, and none of its own namespaces shadows a referenced root | The tests use this assembly as the clean subject for `BNAQ1002` and `BNAQ1004` | `RuleTests.ALeakSetNothingInReachExports_ReportsThatItInspectedNothing`, `AnAssemblyWithNoShadowingSegment_IsClean` |
 | A new or changed `Summary` regenerates the README table | The table is generated from the rule types | `RulesCatalogTests.TheReadmeTable_MatchesTheRuleTypes`; set `AQ_UPDATE_DOCS=1` and run the tests |
