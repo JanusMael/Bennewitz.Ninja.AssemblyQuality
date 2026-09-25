@@ -2,8 +2,10 @@
 
 ## Next release
 
-The version comes from the tag, set from the date when the maintainer gives the go; see
-[docs/publishing.md](docs/publishing.md). One release per calendar day: `2026.3.925` is taken.
+**Planned: `v2026.3.926`**, tagged on the maintainer's go. The version comes from the tag; see
+[docs/publishing.md](docs/publishing.md). One release per calendar day, three-part `YYYY.Q.MMDD`:
+the maintainer declined a same-day `2026.3.925.1` on 2026-09-25, because in this family a fourth
+part is AutoVersioning's `HHmm` build stamp, not a patch counter.
 
 Unreleased since `v2026.3.925`:
 
