@@ -18,5 +18,6 @@
     "conventions"
   ],
   "content": [],
-  "undocumented": {}
+  "undocumented": {},
+  "trimming": "required"
 }
