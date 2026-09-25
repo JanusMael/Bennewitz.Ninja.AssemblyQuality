@@ -10,6 +10,10 @@ Unreleased since `v2026.3.925`:
 | Commit or PR | Change |
 |---|---|
 | #2 | fix: a public type whose base class is in a missing assembly no longer takes the scan down. `GetExportedTypes()` throws `FileNotFoundException` there instead of `ReflectionTypeLoadException`, which escaped the skip handling in every type-reading rule; the loadable types are now examined and the rest named in `Skipped`. Found by ScopedEditors adopting `2026.3.925` (view models deriving from `CommunityToolkit.Mvvm`) |
+| #3 | test: a type that only implements an interface from a missing assembly fails to load the same way, and is covered by the same fix |
+
+**Once it is published**, tell ScopedEditors and AppServices: both have public types deriving from, or
+implementing, types in other assemblies, and each takes the fix in its own change.
 
 ## Last release
 

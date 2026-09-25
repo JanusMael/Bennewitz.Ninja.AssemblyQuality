@@ -117,6 +117,20 @@ public sealed class CoverageTests
         Assert.True(new CancellationTokenRule().Analyze(Orphaned).Inspected > 0);
     }
 
+    /// <summary>
+    /// ⚠ A missing INTERFACE fails a type's load just as a missing base class does. Both of Orphan's
+    /// unloadable shapes are named here, so a fix that handled base classes alone would fail.
+    /// </summary>
+    [Fact]
+    public void ATypeImplementingAMissingInterface_CannotLoad_AndIsCounted()
+    {
+        ReflectionTypeLoadException partial = Assert.Throws<ReflectionTypeLoadException>(() => Orphan.GetTypes());
+        Assert.Equal(2, partial.Types.Count(t => t is null));
+
+        AssemblyRuleResult result = new CancellationTokenRule().Analyze(Orphaned);
+        Assert.Contains(result.Skipped, s => s.Contains("AssemblyQuality.Fixtures.Orphan: 2 type(s) would not load", StringComparison.Ordinal));
+    }
+
     /// <summary>⭐ A scan with every dependency present says its answer is whole.</summary>
     [Fact]
     public void AScanWithEverythingPresent_SkipsNothing()
