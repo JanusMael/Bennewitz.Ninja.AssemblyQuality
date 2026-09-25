@@ -32,7 +32,16 @@ it mean something:
 | `Skipped` is empty | The rule examined only what it could load, not everything. |
 | A check that fails on the wrong assembly | The rules ran against whatever they were handed, not the assembly you meant. |
 
-The first two describe the scan, and both pass when the scan is pointed at the wrong assembly.
+`Skipped` applies to the rules that load types or references: `BNAQ1001`, `BNAQ1002` and
+`BNAQ1004`. `BNAQ1003` reads only the names in the reference list, loads nothing, and so never skips.
+An empty-`Skipped` assertion on it passes, but it cannot fail.
+
+Assert on `Skipped` with the entries in the message, for example
+`Assert.True(result.Skipped.Count == 0, string.Join("\n", result.Skipped))`. xunit's
+`Assert.Empty` shortens each string it prints, which cuts off the part of an entry that says what
+would not load and why.
+
+The first two checks in the table describe the scan, and both pass when the scan is pointed at the wrong assembly.
 Before running the rules, pin the subject by asserting something that is true only of it, such as
 a dependency only it references, or one its neighbours carry and it must not. A helper that loads an
 assembly by name and then checks that the name matches does not do this: it passes for whatever it
