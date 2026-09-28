@@ -32,4 +32,28 @@
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
   </ItemGroup>
+
+  <!-- BNAQ1006's subjects. FriendConsumer was compiled against FriendV1; friend-v1/ holds it beside
+       the provider it was built against, friend-v2/ beside the provider's next release, which removed
+       one internal and withdrew the grant. None is referenced, so the two providers never meet. -->
+  <ItemGroup>
+    <ProjectReference Include="..\fixtures\FriendConsumer\FriendConsumer.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\fixtures\FriendV2\FriendV2.csproj" ReferenceOutputAssembly="false" />
+    <None Include="..\fixtures\FriendConsumer\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.FriendConsumer.dll"
+          Link="friend-v1\AssemblyQuality.Fixtures.FriendConsumer.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\fixtures\FriendV1\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.Friend.dll"
+          Link="friend-v1\AssemblyQuality.Fixtures.Friend.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\fixtures\FriendConsumer\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.FriendConsumer.dll"
+          Link="friend-v2\AssemblyQuality.Fixtures.FriendConsumer.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\fixtures\FriendV2\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.Friend.dll"
+          Link="friend-v2\AssemblyQuality.Fixtures.Friend.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
 </Project>

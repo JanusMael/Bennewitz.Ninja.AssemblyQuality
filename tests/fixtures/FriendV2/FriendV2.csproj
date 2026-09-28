@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The provider's next release: the same assembly name as FriendV1, a newer pinned version,
+       Secret removed, and the grant to the consumer withdrawn while Kept stays internal. A consumer
+       built against version one breaks both ways beside it, and neither breaks its compile. -->
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Friend</AssemblyName>
+    <BuildTimestamp>20270101000000</BuildTimestamp>
+  </PropertyGroup>
+</Project>

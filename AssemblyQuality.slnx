@@ -9,6 +9,9 @@
     <Project Path="tests/fixtures/Absent/Absent.csproj" />
     <Project Path="tests/fixtures/Orphan/Orphan.csproj" />
     <Project Path="tests/fixtures/Dependent/Dependent.csproj" />
+    <Project Path="tests/fixtures/FriendConsumer/FriendConsumer.csproj" />
+    <Project Path="tests/fixtures/FriendV1/FriendV1.csproj" />
+    <Project Path="tests/fixtures/FriendV2/FriendV2.csproj" />
     <Project Path="tests/fixtures/Granting/Granting.csproj" />
     <Project Path="tests/fixtures/VersionOne/VersionOne.csproj" />
     <Project Path="tests/fixtures/VersionTwo/VersionTwo.csproj" />
