@@ -2,9 +2,17 @@
 
 ## Next release
 
-Nothing unreleased since `v2026.3.928`. The version comes from the tag, set from the date when the
-maintainer gives the go; see [docs/publishing.md](docs/publishing.md). One release per calendar day,
-three-part `YYYY.Q.MMDD`: a fourth part is AutoVersioning's `HHmm` build stamp, not a patch counter.
+The version comes from the tag, set from the date when the maintainer gives the go; see
+[docs/publishing.md](docs/publishing.md). One release per calendar day, three-part `YYYY.Q.MMDD`: a
+fourth part is AutoVersioning's `HHmm` build stamp, not a patch counter. `2026.3.928` is taken.
+
+Unreleased since `v2026.3.928`:
+
+| Commit or PR | Change |
+|---|---|
+| #6 | fix: a type that loads while the type it is nested in does not, such as the compiler's `<>c` closure class, no longer takes the scan down. Reading its `Namespace` resolved the unloadable declaring type and threw, in `NamespaceShadowRule.IncludingInternalTypes()` and for a public type nested in an unloadable one. It is now counted in `Skipped`. Found by AppServices adopting `2026.3.928` |
+
+**Once it is published**, tell AppServices; it takes the fix in its own change.
 
 ## Next
 

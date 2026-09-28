@@ -131,6 +131,21 @@ public sealed class CoverageTests
         Assert.Contains(result.Skipped, s => s.Contains("AssemblyQuality.Fixtures.Orphan: 2 type(s) would not load", StringComparison.Ordinal));
     }
 
+    /// <summary>
+    /// ⛔ Regression: a nested type that loads inside a type that does not. <c>GetTypes()</c> returns
+    /// the compiler's closure class <c>Implementer+&lt;&gt;c</c> while returning null for
+    /// <c>Implementer</c>, and reading the closure's <c>Namespace</c> resolves its declaring type and
+    /// throws. The internal-types scan must name it in <c>Skipped</c>, not crash on it.
+    /// </summary>
+    [Fact]
+    public void ANestedTypeInsideATypeThatCannotLoad_IsSkippedNotFatal()
+    {
+        AssemblyRuleResult result = NamespaceShadowRule.IncludingInternalTypes().Analyze(Orphaned);
+
+        Assert.Contains(result.Skipped, s => s.Contains("AssemblyQuality.Fixtures.Orphan: 3 type(s) would not load", StringComparison.Ordinal));
+        Assert.True(result.Inspected > 0, "the types that did load must still be examined");
+    }
+
     /// <summary>⭐ A scan with every dependency present says its answer is whole.</summary>
     [Fact]
     public void AScanWithEverythingPresent_SkipsNothing()
