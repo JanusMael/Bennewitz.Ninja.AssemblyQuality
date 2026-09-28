@@ -12,6 +12,7 @@ root [AGENTS.md](../AGENTS.md); this file names where each part of it lives.
 | `Rules/CancellationTokenRule.cs` | `BNAQ1001`: no public method takes a defaulted `CancellationToken`, nor is a token-less overload of a sibling that takes one. A policy rule, not a defect rule |
 | `Rules/SurfaceLeakRule.cs` | `BNAQ1002`: no type from a leak-prone namespace in the public surface, generic arguments unwrapped. Defaults to `LeakProneNamespaces`; `Only(...)` replaces the set |
 | `Rules/ForbiddenReferenceRule.cs` | `BNAQ1003`: no direct reference whose simple name starts with a forbidden prefix. No default set, so unconfigured it inspects nothing |
+| `Rules/FriendGrantRule.cs` | `BNAQ1005`: every `InternalsVisibleTo` grant names an assembly the caller allows. No default allow-list, so unconfigured it inspects nothing. Reads the assembly's own attributes and never skips |
 | `Rules/NamespaceShadowRule.cs` | `BNAQ1004`: no namespace segment after the first shadows a referenced assembly's root. Public types by default; `IncludingInternalTypes()` widens it |
 
 ## Rules

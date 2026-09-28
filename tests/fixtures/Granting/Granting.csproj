@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Declares its own InternalsVisibleTo grants, three of them deliberately wrong, as BNAQ1005's
+       subject. When this repository adopts the family's solution-wide grants (Templates plan 00006),
+       this project opts out with SolutionFriendGrants=false: the shared grant file would otherwise
+       grant it everything and hide the cases under test. -->
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Granting</AssemblyName>
+  </PropertyGroup>
+</Project>

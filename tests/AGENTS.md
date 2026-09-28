@@ -11,6 +11,8 @@ keeps the fixtures plain libraries.
 | `AssemblyQuality.Tests/Rules/RulesCatalogTests.cs` | The catalogue: ids unique, summaries present, the README rules table in sync |
 | `AssemblyQuality.Tests/Packaging/PackagingTests.cs` | Every packable project classified in `packages.push` or `packages.local`, and `release.yml` naming what it publishes, never globbing |
 | `AssemblyQuality.Tests/Fixtures/` | Compiled subjects: `Offender`, `Overloaded`, `Clean` in `Subjects.cs`; namespace shadows in `Shadowed.cs`, `HiddenShadow.cs`, `OwnRoot.cs` |
+| `AssemblyQuality.Tests/Rules/FriendGrantTests.cs` | `BNAQ1005` against the `Granting` fixture |
+| `fixtures/Granting/` | Four `InternalsVisibleTo` grants: to `AssemblyQuality.Tests`, to an external name, to a namespace-form name, and to a name that exists nowhere. Referenced by the test project. Opts out of solution-wide grants once this repository adopts them |
 | `AssemblyQuality.Tests/Rules/LoadContextTests.cs` | References resolve in the scanned assembly's own load context, against the `versioned/` fixtures |
 | `fixtures/Dependent/`, `fixtures/VersionOne/`, `fixtures/VersionTwo/` | `Dependent` is compiled against `VersionOne`; `VersionTwo` has the same assembly name, a newer pinned `BuildTimestamp` and a different root namespace. Only `Dependent` and `VersionTwo` are copied into `versioned/` |
 | `fixtures/Orphan/`, `fixtures/Absent/` | `Orphan` references `Absent` with `Private="false"`, and only `Orphan`'s dll is copied into the test output's `orphan/` folder, so `Absent` really will not load |

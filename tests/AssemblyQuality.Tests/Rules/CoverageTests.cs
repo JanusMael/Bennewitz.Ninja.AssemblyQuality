@@ -106,7 +106,9 @@ public sealed class CoverageTests
     {
         Assert.Throws<FileNotFoundException>(() => Orphan.GetExportedTypes());
 
-        foreach (IAssemblyRule rule in RulesCatalogTests.DiscoverRules().Where(r => r is not ForbiddenReferenceRule))
+        // BNAQ1003 and BNAQ1005 read only the assembly's own metadata (its reference list, its grants)
+        // and load no type, so they never skip and are not asked to here.
+        foreach (IAssemblyRule rule in RulesCatalogTests.DiscoverRules().Where(r => r is not (ForbiddenReferenceRule or FriendGrantRule)))
         {
             AssemblyRuleResult result = rule.Analyze(Orphaned);
             Assert.Contains(result.Skipped, s => s.Contains("AssemblyQuality.Fixtures.Orphan", StringComparison.Ordinal)
