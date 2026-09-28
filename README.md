@@ -33,8 +33,9 @@ it mean something:
 | A check that fails on the wrong assembly | The rules ran against whatever they were handed, not the assembly you meant. |
 
 `Skipped` applies to the rules that load types or references: `BNAQ1001`, `BNAQ1002` and
-`BNAQ1004`. `BNAQ1003` reads only the names in the reference list, loads nothing, and so never skips.
-An empty-`Skipped` assertion on it passes, but it cannot fail.
+`BNAQ1004`. `BNAQ1003` reads only the names in the reference list and `BNAQ1005` only the assembly's
+own grants; they load nothing, and so never skip. An empty-`Skipped` assertion on either passes, but
+it cannot fail.
 
 Assert on `Skipped` with the entries in the message, for example
 `Assert.True(result.Skipped.Count == 0, string.Join("\n", result.Skipped))`. xunit's
@@ -75,6 +76,7 @@ MIT. See [LICENSE](LICENSE).
 | `BNAQ1002` | No type from a leak-prone namespace appears in the public surface. |
 | `BNAQ1003` | An assembly references none of the assemblies its layer forbids. |
 | `BNAQ1004` | No declared namespace segment shadows the root namespace of a referenced assembly. |
+| `BNAQ1005` | Every InternalsVisibleTo grant names an assembly the caller allows. |
 <!-- END GENERATED RULES -->
 
 **Renamed after `2026.3.922`.** Up to and including that version the IDs were `AQ1001`–`AQ1004`.
@@ -134,3 +136,20 @@ compares against the roots of references it can load, and names any it cannot in
 analyzer runs where the compiler has every reference. Measured on this repository's own fixtures:
 `BNCQ1004` reports the `Orphan.Absent` shadow in `tests/fixtures/Orphan`, whose referenced assembly
 is deliberately missing at run time, while `BNAQ1004` lists that reference in `Skipped`.
+
+### BNAQ1005
+
+Every `InternalsVisibleTo` grant names an assembly the caller allows. Pass the allowed names:
+`new FriendGrantRule(allowed)`. Unconfigured, it reports `Inspected` of zero, as `BNAQ1003` does.
+There is no source-side counterpart: what matters is the grant list the compiled assembly carries,
+whichever of the attribute, the SDK's `<InternalsVisibleTo>` item or an `<AssemblyAttribute>` put it
+there.
+
+⛔ **A wrong grant fails silently.** A grant matches an assembly's simple name only, so one naming a
+namespace (`Bennewitz.Ninja.X` where the assembly is `X`) or a misspelled assembly compiles, ships
+and grants nothing. Names compare case-insensitively, and a `PublicKey=` part is ignored.
+
+Outside the Bennewitz.Ninja family it answers the same question for any solution that grants
+internals: pass the assemblies your solution builds, plus any you grant to on purpose. Scan your
+shipped assemblies and allow your test assemblies by name, since a scan that leaves the tests out
+cannot tell they exist.

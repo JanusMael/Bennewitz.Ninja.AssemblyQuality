@@ -12,6 +12,7 @@ Unreleased since `v2026.3.928`:
 |---|---|
 | #6 | fix: a type that loads while the type it is nested in does not, such as the compiler's `<>c` closure class, no longer takes the scan down. Reading its `Namespace` resolved the unloadable declaring type and threw, in `NamespaceShadowRule.IncludingInternalTypes()` and for a public type nested in an unloadable one. It is now counted in `Skipped`. Found by AppServices adopting `2026.3.928` |
 | #10 | fix: a scanned assembly's references resolve in its own `AssemblyLoadContext`, not the default one, so an assembly loaded beside a different version of a dependency is judged against that version. `plans/00001` step 1 |
+| #12 | feat: `BNAQ1005` (`FriendGrantRule`): every compiled `InternalsVisibleTo` grant names an assembly the caller allows, catching a namespace-form or misspelled grant that compiles, ships and grants nothing. Configured only; unconfigured it inspects nothing. `plans/00001` step 3 |
 
 **Once it is published**, tell AppServices; it takes the fix in its own change.
 
@@ -50,9 +51,9 @@ maintainer's approval.
 |---|---|
 | 1. References resolve in the scanned assembly's own load context | **Done**, #10 |
 | 2. Spike: `ResolveMember`, framework detection, provider-side wiring | **Done**, 2026-09-28; findings below |
-| 3. `BNAQ1005` | Next |
-| 4. `BNAQ1006` | Waits on 3 |
-| 5. Docs | With 3 and 4 |
+| 3. `BNAQ1005` | **Done**, with its README section |
+| 4. `BNAQ1006` | Next |
+| 5. Docs | `BNAQ1005`'s done with step 3; `BNAQ1006`'s with step 4 |
 | 6. Release | On the maintainer's go |
 
 ### Step 2 findings, for step 4's design

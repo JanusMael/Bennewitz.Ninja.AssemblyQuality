@@ -2,6 +2,8 @@
   <!-- Framework packages, IsTestProject and OutputType all come from tests/Directory.Build.props. -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\AssemblyQuality\AssemblyQuality.csproj" />
+    <!-- BNAQ1005's subject: an assembly with four grants, three of them deliberately wrong. -->
+    <ProjectReference Include="..\fixtures\Granting\Granting.csproj" />
   </ItemGroup>
 
   <!-- Orphan is built but NOT referenced, and only its own dll is copied, into orphan/. Absent,
