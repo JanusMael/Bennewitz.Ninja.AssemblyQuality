@@ -8,5 +8,8 @@
   <Folder Name="/tests/fixtures/">
     <Project Path="tests/fixtures/Absent/Absent.csproj" />
     <Project Path="tests/fixtures/Orphan/Orphan.csproj" />
+    <Project Path="tests/fixtures/Dependent/Dependent.csproj" />
+    <Project Path="tests/fixtures/VersionOne/VersionOne.csproj" />
+    <Project Path="tests/fixtures/VersionTwo/VersionTwo.csproj" />
   </Folder>
 </Solution>

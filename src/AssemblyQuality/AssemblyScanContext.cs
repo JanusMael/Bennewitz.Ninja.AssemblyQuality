@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.Loader;
 
 namespace Bennewitz.Ninja.AssemblyQuality;
 
@@ -117,7 +118,11 @@ public sealed class AssemblyScanContext
             Assembly referenced;
             try
             {
-                referenced = Assembly.Load(reference);
+                // ⛔ In the scanned assembly's own load context, never the default one: an assembly
+                // loaded beside a different version of a dependency sees that version, and the rule
+                // must answer for what it sees. Measured with LoadContextTests' version-two fixture.
+                referenced = (AssemblyLoadContext.GetLoadContext(assembly) ?? AssemblyLoadContext.Default)
+                    .LoadFromAssemblyName(reference);
             }
             catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or BadImageFormatException)
             {
