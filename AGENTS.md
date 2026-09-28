@@ -44,6 +44,7 @@ These are the same steps CI runs ([.github/workflows/ci.yml](.github/workflows/c
 | `tests/fixtures/` | Fixture assemblies the tests reflect over. They have their own `Directory.Build.props`, so they are plain libraries, not test projects |
 | `packages.push` / `packages.local` | Which package ids publish and which must never publish. `PackagingTests` fails on any packable project listed in neither |
 | `docs/publishing.md` | Trusted publishing (OIDC) setup and failure modes |
+| `plans/` | Numbered plans; an approved one is never edited. Their lifecycle is in [plans/AGENTS.md](plans/AGENTS.md) |
 | `PROGRESS.md` | Work state and the list of what goes into the next release |
 
 ## The contract every rule keeps
