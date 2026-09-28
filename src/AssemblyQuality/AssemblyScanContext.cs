@@ -221,10 +221,38 @@ public sealed class AssemblyScanContext
         }
     }
 
+    /// <summary>
+    /// The types a partial load returned, less any that still cannot be read, with every one that did not
+    /// load counted in <paramref name="skipped"/>.
+    /// </summary>
+    /// <remarks>
+    /// ⛔ <b>A type can load while the type it is nested in does not.</b> The compiler's closure class
+    /// <c>Sink+&lt;&gt;c</c> comes back from <c>GetTypes()</c> beside a null for <c>Sink</c>, and reading
+    /// its <c>Namespace</c> resolves the declaring type and throws <see cref="FileNotFoundException"/>.
+    /// So each returned type is probed once here, where a failure is counted, rather than in every rule
+    /// that reads it. Measured: AppServices' <c>BucketedRollingFileSink</c> took
+    /// <c>NamespaceShadowRule.IncludingInternalTypes()</c> down this way.
+    /// </remarks>
     private static Type[] Partial(Assembly assembly, ReflectionTypeLoadException ex, bool publicOnly, ICollection<string>? skipped)
     {
-        skipped?.Add($"{assembly.GetName().Name}: {ex.Types.Count(t => t is null)} type(s) would not load "
+        int failed = ex.Types.Count(t => t is null);
+        List<Type> loaded = [];
+
+        foreach (Type type in ex.Types.OfType<Type>().Where(t => !publicOnly || t.IsPublic || t.IsNestedPublic))
+        {
+            try
+            {
+                _ = type.Namespace;
+                loaded.Add(type);
+            }
+            catch (Exception probe) when (IsLoadFailure(probe))
+            {
+                failed++;
+            }
+        }
+
+        skipped?.Add($"{assembly.GetName().Name}: {failed} type(s) would not load "
             + $"({ex.LoaderExceptions.FirstOrDefault()?.Message ?? "no loader message"}), so they were not examined.");
-        return [.. ex.Types.OfType<Type>().Where(t => !publicOnly || t.IsPublic || t.IsNestedPublic)];
+        return [.. loaded];
     }
 }
