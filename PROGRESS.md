@@ -34,7 +34,8 @@ each for the maintainer's approval:
 | Within a solution | Every project grants to every other, test projects included; grants between product projects are encouraged. `internal` then means solution-internal, so a member no other assembly may reach is `private` |
 | Across repositories | Internals may be granted to the maintainer's other repositories wherever that reduces friction, declared in the External file |
 | Signing | None. A grant is matched by assembly name, and on modern .NET public signing satisfies a keyed grant without the private key, so neither is a security boundary. Grants name only assemblies the family ships, and public consumers get none |
-| Version skew | An internal another repository uses is an informal promise: its owner does not change it without releasing the consumer. `BNAQ1006` in the consumer's tests catches a break against the resolved version |
+| Name collisions | Accepted and documented (2026-09-28). Family assembly names are unprefixed, so a public assembly that happens to share one would receive its grants; names such as `AppServices.Tests` make that unlikely |
+| Version skew | An internal another repository uses is an informal promise: its owner does not change it without releasing the consumer. **`BNAQ1006` runs at the provider's release** (revised 2026-09-28), loading the already-published consumers beside the new build; in the consumer's own tests a removed internal is a compile error first, so the rule could almost never fail there |
 | `BNAQ1005`'s allowed names | The solution's own assemblies plus the External file's names, supplied by the repository's test. No family registry for now |
 | Existing repositories | Each moves over when it next syncs the Templates conventions. AppServices, FileServer and ScopedEditors document "grants to tests only" and rewrite those rules then |
 | Order | Plans, then the Templates convention, then `BNAQ1005`, then `BNAQ1006` |
