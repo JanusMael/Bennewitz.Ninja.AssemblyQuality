@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.FriendConsumer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private="false": compiled against version one, never copied beside it. The test puts it
+         beside version one or version two in a load context of its own. -->
+    <ProjectReference Include="..\FriendV1\FriendV1.csproj" Private="false" />
+  </ItemGroup>
+</Project>

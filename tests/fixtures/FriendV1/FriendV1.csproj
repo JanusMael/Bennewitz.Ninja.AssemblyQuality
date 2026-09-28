@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The provider as FriendConsumer was built against: two internals, granted to the consumer.
+       BuildTimestamp is pinned so version one stays older than FriendV2, which shares its name. -->
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Friend</AssemblyName>
+    <BuildTimestamp>20260101000000</BuildTimestamp>
+  </PropertyGroup>
+</Project>

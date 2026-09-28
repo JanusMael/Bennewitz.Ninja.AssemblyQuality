@@ -32,8 +32,8 @@ it mean something:
 | `Skipped` is empty | The rule examined only what it could load, not everything. |
 | A check that fails on the wrong assembly | The rules ran against whatever they were handed, not the assembly you meant. |
 
-`Skipped` applies to the rules that load types or references: `BNAQ1001`, `BNAQ1002` and
-`BNAQ1004`. `BNAQ1003` reads only the names in the reference list and `BNAQ1005` only the assembly's
+`Skipped` applies to the rules that load types or references: `BNAQ1001`, `BNAQ1002`, `BNAQ1004`
+and `BNAQ1006`. `BNAQ1003` reads only the names in the reference list and `BNAQ1005` only the assembly's
 own grants; they load nothing, and so never skip. An empty-`Skipped` assertion on either passes, but
 it cannot fail.
 
@@ -77,6 +77,7 @@ MIT. See [LICENSE](LICENSE).
 | `BNAQ1003` | An assembly references none of the assemblies its layer forbids. |
 | `BNAQ1004` | No declared namespace segment shadows the root namespace of a referenced assembly. |
 | `BNAQ1005` | Every InternalsVisibleTo grant names an assembly the caller allows. |
+| `BNAQ1006` | Every reference into another assembly resolves, and every one into an internal is still granted. |
 <!-- END GENERATED RULES -->
 
 **Renamed after `2026.3.922`.** Up to and including that version the IDs were `AQ1001`–`AQ1004`.
@@ -153,3 +154,67 @@ Outside the Bennewitz.Ninja family it answers the same question for any solution
 internals: pass the assemblies your solution builds, plus any you grant to on purpose. Scan your
 shipped assemblies and allow your test assemblies by name, since a scan that leaves the tests out
 cannot tell they exist.
+
+### BNAQ1006
+
+Every reference into another assembly resolves, and every one into an internal is still granted. It
+examines references into assemblies outside the scan and outside the shared framework, resolves each
+through the runtime's own `Module.ResolveType` / `ResolveMember`, and reports:
+
+- a type or member the loaded version no longer has, which fails at run time with
+  `TypeLoadException` or `MissingMethodException`. A removed type is reported once, not once per
+  member reference through it;
+- a reference to an internal whose provider no longer grants the scanned assembly, which resolves
+  fine and then fails at the call with `MethodAccessException`.
+
+A reference that will not load is named in `Skipped`, and so is an assembly with no file behind it.
+There is no source-side counterpart: the question is about the version that loads, which does not
+exist at compile time.
+
+⭐ **Run it at the provider's release, against the consumers already published.** A consumer's own
+tests compile against the provider they load, so a removed internal is a compile error there first,
+and this rule could almost never fail. The break happens in an application that resolves a newer
+provider under a consumer built against an older one, and the provider's release is the one place
+that pairing can be assembled before it ships. In the provider's test project:
+
+```xml
+<ItemGroup>
+  <!-- The provider under test, from source. -->
+  <ProjectReference Include="..\..\src\Provider\Provider.csproj" />
+  <!-- Each published consumer. PackageDownload fetches it WITHOUT joining the restore graph, so the
+       consumer's own dependency on an older provider never lands beside the source build. -->
+  <PackageDownload Include="Some.Consumer" Version="[1.2.3]" />
+</ItemGroup>
+
+<Target Name="CopyConsumers" AfterTargets="Build">
+  <PropertyGroup>
+    <!-- NuGetPackageRoot has no trailing slash when RestorePackagesPath is overridden. -->
+    <_ConsumerLib>$([System.IO.Path]::Combine($(NuGetPackageRoot), 'some.consumer', '1.2.3', 'lib', 'net10.0'))</_ConsumerLib>
+  </PropertyGroup>
+  <ItemGroup>
+    <_Consumer Include="$(_ConsumerLib)/*.dll" />
+  </ItemGroup>
+  <Copy SourceFiles="@(_Consumer)" DestinationFolder="$(OutDir)consumers" />
+</Target>
+```
+
+Then load each consumer in an `AssemblyLoadContext` of its own that resolves the provider from the
+test's output, which is the source build, and scan the consumer:
+
+```csharp
+AssemblyLoadContext context = new("consumer", isCollectible: true);
+context.Resolving += (_, name) =>
+{
+    string candidate = Path.Combine(AppContext.BaseDirectory, name.Name + ".dll");
+    return File.Exists(candidate) ? context.LoadFromAssemblyPath(candidate) : null;
+};
+Assembly consumer = context.LoadFromAssemblyPath(Path.Combine(AppContext.BaseDirectory, "consumers", "Some.Consumer.dll"));
+
+AssemblyRuleResult result = new FriendReferenceRule().Analyze(AssemblyScanContext.Of(consumer));
+Assert.True(result.Findings.Count == 0, string.Join("\n", result.Findings));
+Assert.True(result.Inspected > 0, "the consumer must reference the provider at all");
+```
+
+Outside the Bennewitz.Ninja family it answers the same question for any library with published
+dependents, internals or not: will what they call still be there when an application pairs them with
+this release?

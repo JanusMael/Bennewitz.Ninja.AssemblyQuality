@@ -13,6 +13,7 @@ root [AGENTS.md](../AGENTS.md); this file names where each part of it lives.
 | `Rules/SurfaceLeakRule.cs` | `BNAQ1002`: no type from a leak-prone namespace in the public surface, generic arguments unwrapped. Defaults to `LeakProneNamespaces`; `Only(...)` replaces the set |
 | `Rules/ForbiddenReferenceRule.cs` | `BNAQ1003`: no direct reference whose simple name starts with a forbidden prefix. No default set, so unconfigured it inspects nothing |
 | `Rules/FriendGrantRule.cs` | `BNAQ1005`: every `InternalsVisibleTo` grant names an assembly the caller allows. No default allow-list, so unconfigured it inspects nothing. Reads the assembly's own attributes and never skips |
+| `Rules/FriendReferenceRule.cs` | `BNAQ1006`: every reference into an assembly outside the scan and the shared framework resolves, via `Module.ResolveType` / `ResolveMember`, and every one into an internal is still granted. Runs at a provider's release, against published consumers. Reads metadata from the assembly's file, in its own load context |
 | `Rules/NamespaceShadowRule.cs` | `BNAQ1004`: no namespace segment after the first shadows a referenced assembly's root. Public types by default; `IncludingInternalTypes()` widens it |
 
 ## Rules

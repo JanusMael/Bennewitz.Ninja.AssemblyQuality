@@ -11,6 +11,8 @@ keeps the fixtures plain libraries.
 | `AssemblyQuality.Tests/Rules/RulesCatalogTests.cs` | The catalogue: ids unique, summaries present, the README rules table in sync |
 | `AssemblyQuality.Tests/Packaging/PackagingTests.cs` | Every packable project classified in `packages.push` or `packages.local`, and `release.yml` naming what it publishes, never globbing |
 | `AssemblyQuality.Tests/Fixtures/` | Compiled subjects: `Offender`, `Overloaded`, `Clean` in `Subjects.cs`; namespace shadows in `Shadowed.cs`, `HiddenShadow.cs`, `OwnRoot.cs` |
+| `AssemblyQuality.Tests/Rules/FriendReferenceTests.cs` | `BNAQ1006` against `FriendConsumer` beside `friend-v1/` and `friend-v2/` |
+| `fixtures/FriendConsumer/`, `fixtures/FriendV1/`, `fixtures/FriendV2/` | `FriendConsumer` is compiled against `FriendV1` (two internals, granted); `FriendV2` has the same assembly name, a newer pinned `BuildTimestamp`, one internal removed and the grant withdrawn. `friend-v1/` and `friend-v2/` each hold the consumer beside one version |
 | `AssemblyQuality.Tests/Rules/FriendGrantTests.cs` | `BNAQ1005` against the `Granting` fixture |
 | `fixtures/Granting/` | Four `InternalsVisibleTo` grants: to `AssemblyQuality.Tests`, to an external name, to a namespace-form name, and to a name that exists nowhere. Referenced by the test project. Opts out of solution-wide grants once this repository adopts them |
 | `AssemblyQuality.Tests/Rules/LoadContextTests.cs` | References resolve in the scanned assembly's own load context, against the `versioned/` fixtures |
