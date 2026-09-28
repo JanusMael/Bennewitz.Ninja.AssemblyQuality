@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Dependent</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Private="false": compiled against version one, never copied beside it. The test supplies
+         version two instead, in a load context of its own. -->
+    <ProjectReference Include="..\VersionOne\VersionOne.csproj" Private="false" />
+  </ItemGroup>
+</Project>

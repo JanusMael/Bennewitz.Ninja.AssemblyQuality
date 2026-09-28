@@ -14,4 +14,20 @@
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
   </ItemGroup>
+
+  <!-- Dependent was compiled against version one of AssemblyQuality.Fixtures.Versioned; versioned/
+       holds Dependent beside VERSION TWO. Neither is referenced, so this test project never sees two
+       assemblies of one name. The load-context tests load versioned/ into a context of its own. -->
+  <ItemGroup>
+    <ProjectReference Include="..\fixtures\Dependent\Dependent.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\fixtures\VersionTwo\VersionTwo.csproj" ReferenceOutputAssembly="false" />
+    <None Include="..\fixtures\Dependent\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.Dependent.dll"
+          Link="versioned\AssemblyQuality.Fixtures.Dependent.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+    <None Include="..\fixtures\VersionTwo\bin\$(Configuration)\$(TargetFramework)\AssemblyQuality.Fixtures.Versioned.dll"
+          Link="versioned\AssemblyQuality.Fixtures.Versioned.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
+  </ItemGroup>
 </Project>

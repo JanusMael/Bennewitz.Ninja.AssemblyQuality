@@ -11,6 +11,7 @@ Unreleased since `v2026.3.928`:
 | Commit or PR | Change |
 |---|---|
 | #6 | fix: a type that loads while the type it is nested in does not, such as the compiler's `<>c` closure class, no longer takes the scan down. Reading its `Namespace` resolved the unloadable declaring type and threw, in `NamespaceShadowRule.IncludingInternalTypes()` and for a public type nested in an unloadable one. It is now counted in `Skipped`. Found by AppServices adopting `2026.3.928` |
+| #10 | fix: a scanned assembly's references resolve in its own `AssemblyLoadContext`, not the default one, so an assembly loaded beside a different version of a dependency is judged against that version. `plans/00001` step 1 |
 
 **Once it is published**, tell AppServices; it takes the fix in its own change.
 

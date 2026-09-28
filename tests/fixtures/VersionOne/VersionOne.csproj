@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Version one of AssemblyQuality.Fixtures.Versioned, which Dependent is compiled against.
+       VersionTwo ships the same assembly name with different namespaces, as a newer release would.
+       BuildTimestamp is pinned so the two assembly versions are fixed and ordered, one before two:
+       AutoVersioning stamps the assembly version from it, and a build-time stamp would let an
+       incremental build make version one the newer. -->
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Versioned</AssemblyName>
+    <BuildTimestamp>20260101000000</BuildTimestamp>
+  </PropertyGroup>
+</Project>

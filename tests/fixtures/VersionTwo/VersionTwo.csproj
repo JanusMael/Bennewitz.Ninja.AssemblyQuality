@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Version two of AssemblyQuality.Fixtures.Versioned: the same assembly name as VersionOne, a
+       newer pinned version, and a different root namespace. The test loads it beside Dependent in a
+       load context of its own, as an application that picked up the newer release would. -->
+  <PropertyGroup>
+    <AssemblyName>AssemblyQuality.Fixtures.Versioned</AssemblyName>
+    <BuildTimestamp>20270101000000</BuildTimestamp>
+  </PropertyGroup>
+</Project>
