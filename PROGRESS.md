@@ -2,37 +2,26 @@
 
 ## Next release
 
-The version comes from the tag, set from the date when the maintainer gives the go; see
-[docs/publishing.md](docs/publishing.md). One release per calendar day, three-part `YYYY.Q.MMDD`: a
-fourth part is AutoVersioning's `HHmm` build stamp, not a patch counter. `2026.3.928` is taken.
-
-Unreleased since `v2026.3.928`:
-
-| Commit or PR | Change |
-|---|---|
-| #6 | fix: a type that loads while the type it is nested in does not, such as the compiler's `<>c` closure class, no longer takes the scan down. Reading its `Namespace` resolved the unloadable declaring type and threw, in `NamespaceShadowRule.IncludingInternalTypes()` and for a public type nested in an unloadable one. It is now counted in `Skipped`. Found by AppServices adopting `2026.3.928` |
-| #10 | fix: a scanned assembly's references resolve in its own `AssemblyLoadContext`, not the default one, so an assembly loaded beside a different version of a dependency is judged against that version. `plans/00001` step 1 |
-| #12 | feat: `BNAQ1005` (`FriendGrantRule`): every compiled `InternalsVisibleTo` grant names an assembly the caller allows, catching a namespace-form or misspelled grant that compiles, ships and grants nothing. Configured only; unconfigured it inspects nothing. `plans/00001` step 3 |
-| #13 | feat: `BNAQ1006` (`FriendReferenceRule`): every reference into an assembly outside the scan and the shared framework resolves, through the runtime's own `ResolveType` / `ResolveMember`, and every one into an internal is still granted. Meant for a provider's release, scanning its published consumers; the README shows the `PackageDownload` wiring. `plans/00001` steps 4 and 5 |
-
-**Once it is published**, tell AppServices; it takes the fix in its own change.
+Nothing unreleased since `v2026.3.929`. The version comes from the tag, set from the date when the
+maintainer gives the go; see [docs/publishing.md](docs/publishing.md). One release per calendar day,
+three-part `YYYY.Q.MMDD`: a fourth part is AutoVersioning's `HHmm` build stamp, not a patch counter.
 
 ## Next
 
-**Friend grants across the family**, decided 2026-09-28. Two plans, one per repository: this
-repository's `00001` is built and awaits only its release (below); Templates' `00006` was approved on
-2026-09-28, with the provider-side `BNAQ1006` wiring left to a later Templates plan. When this
-repository adopts `00006`, its `Granting`, `FriendV1` and `FriendV2` fixtures set
-`SolutionFriendGrants` to `false`, since their grants are wrong or withdrawn on purpose.
+**Friend grants across the family**, decided 2026-09-28. This repository's plan `00001` is complete
+and released as `2026.3.929` (below). What remains is Templates':
 
-1. **Bennewitz.Ninja.Templates** owns the policy: a generated `AssemblyInfo.InternalsVisibleTo.cs`
-   listing every assembly in the solution, linked into every project by `Directory.Build.targets`;
-   a hand-written `AssemblyInfo.InternalsVisibleTo.External.cs` for grants to other repositories;
-   a csproj property to opt a project out; and conventions checks that the generated file is current
-   and that no project declares a grant of its own. It lands first.
-2. **This repository** adds two configurable rules, reading what was compiled: `BNAQ1005`, every
-   `InternalsVisibleTo` grant names an allowed assembly; then `BNAQ1006`, every reference into
-   another assembly's internals resolves against the version that loads.
+1. **Templates' `00006`** (approved 2026-09-28) lands the policy: a generated
+   `AssemblyInfo.InternalsVisibleTo.cs` listing every assembly in the solution, linked into every
+   project by `Directory.Build.targets`; a hand-written `AssemblyInfo.InternalsVisibleTo.External.cs`
+   for grants to other repositories; a per-project `SolutionFriendGrants=false` opt-out; and the
+   conventions checks. Its step 5 has `bbavalonia` call `BNAQ1005`.
+2. **This repository adopts `00006`** when it next syncs the conventions script. Its `Granting`,
+   `FriendV1` and `FriendV2` fixtures then set `SolutionFriendGrants` to `false`, since their grants
+   are wrong or withdrawn on purpose.
+3. **A later Templates plan** sets the provider-side `BNAQ1006` convention: which repositories declare
+   their published consumers, and where the release check lives. The wiring it builds on is in the
+   README's `BNAQ1006` section.
 
 | Decision | Choice |
 |---|---|
@@ -57,7 +46,7 @@ repository adopts `00006`, its `Granting`, `FriendV1` and `FriendV2` fixtures se
 | 3. `BNAQ1005` | **Done**, with its README section |
 | 4. `BNAQ1006` | **Done**, with its README section and the provider-side wiring |
 | 5. Docs | **Done**, with steps 3 and 4 |
-| 6. Release | On the maintainer's go |
+| 6. Release | **Done**, `v2026.3.929` on 2026-09-29; Templates and AppServices told |
 
 ### Step 2 findings, for step 4's design
 
@@ -91,12 +80,13 @@ references were resolved and then **called**, so the runtime's verdict was the g
 
 ## Last release
 
-**`v2026.3.928`**, 2026-09-28: published to nuget.org and verified from the feed. The DLL in the
+**`v2026.3.929`**, 2026-09-29: published to nuget.org and verified from the feed. The DLL in the
 feed's package is byte-identical to the GitHub release asset, and a project restoring from nuget.org
-alone gets it. It fixes `2026.3.925`'s crash when a scanned type's base class or interface is in an
-assembly that will not load (#2, #3); the
-[release notes](https://github.com/JanusMael/Bennewitz.Ninja.AssemblyQuality/releases/tag/v2026.3.928)
-have the detail. `2026.3.926` was planned for this fix but never tagged.
+alone gets it and lists all six rules. It adds `BNAQ1005` (#12) and `BNAQ1006` (#13), and fixes a
+nested type in one that will not load (#6) and references resolving outside the scanned assembly's
+load context (#10). No breaking change. The
+[release notes](https://github.com/JanusMael/Bennewitz.Ninja.AssemblyQuality/releases/tag/v2026.3.929)
+have the detail.
 
 ## Decisions
 
