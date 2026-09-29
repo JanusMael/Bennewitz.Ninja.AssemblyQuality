@@ -20,8 +20,10 @@ Unreleased since `v2026.3.928`:
 ## Next
 
 **Friend grants across the family**, decided 2026-09-28. Two plans, one per repository: this
-repository's `00001` is approved and under way (below); Templates' `00006` is a draft awaiting the
-maintainer's approval.
+repository's `00001` is built and awaits only its release (below); Templates' `00006` was approved on
+2026-09-28, with the provider-side `BNAQ1006` wiring left to a later Templates plan. When this
+repository adopts `00006`, its `Granting`, `FriendV1` and `FriendV2` fixtures set
+`SolutionFriendGrants` to `false`, since their grants are wrong or withdrawn on purpose.
 
 1. **Bennewitz.Ninja.Templates** owns the policy: a generated `AssemblyInfo.InternalsVisibleTo.cs`
    listing every assembly in the solution, linked into every project by `Directory.Build.targets`;
