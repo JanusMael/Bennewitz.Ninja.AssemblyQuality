@@ -9,19 +9,19 @@ three-part `YYYY.Q.MMDD`: a fourth part is AutoVersioning's `HHmm` build stamp, 
 ## Next
 
 **Friend grants across the family**, decided 2026-09-28. This repository's plan `00001` is complete
-and released as `2026.3.929` (below). What remains is Templates':
+and released as `2026.3.929` (below). Templates' `00006` (approved 2026-09-28) has landed there: the
+generated, linked `AssemblyInfo.InternalsVisibleTo.cs`, the hand-written External file, the
+per-project `SolutionFriendGrants=false` opt-out and the conventions checks; and `bbavalonia` calls
+`BNAQ1005`. What remains here, in order:
 
-1. **Templates' `00006`** (approved 2026-09-28) lands the policy: a generated
-   `AssemblyInfo.InternalsVisibleTo.cs` listing every assembly in the solution, linked into every
-   project by `Directory.Build.targets`; a hand-written `AssemblyInfo.InternalsVisibleTo.External.cs`
-   for grants to other repositories; a per-project `SolutionFriendGrants=false` opt-out; and the
-   conventions checks. Its step 5 has `bbavalonia` call `BNAQ1005`.
-2. **This repository adopts `00006`** when it next syncs the conventions script. Its `Granting`,
-   `FriendV1` and `FriendV2` fixtures then set `SolutionFriendGrants` to `false`, since their grants
-   are wrong or withdrawn on purpose.
-3. **A later Templates plan** sets the provider-side `BNAQ1006` convention: which repositories declare
+1. **Adopt `00006`**: take Templates' current `scripts/repo-conventions.cs`, generate the grants file
+   with its `grants` verb, and link both files the way `bbpkg` does. The `Granting`, `FriendV1` and
+   `FriendV2` fixtures set `SolutionFriendGrants` to `false`, since their grants are wrong or withdrawn
+   on purpose; check whether `Orphan`, `Absent`, `Dependent` and the `Version*` fixtures are better
+   opted out too. Read Templates' "Drift from `plans/00006`" in its `PROGRESS.md` first.
+2. **A later Templates plan** sets the provider-side `BNAQ1006` convention: which repositories declare
    their published consumers, and where the release check lives. The wiring it builds on is in the
-   README's `BNAQ1006` section.
+   README's `BNAQ1006` section. Nothing to do here until it exists.
 
 | Decision | Choice |
 |---|---|
