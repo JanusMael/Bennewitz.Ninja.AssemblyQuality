@@ -4,6 +4,7 @@
        built against version one breaks both ways beside it, and neither breaks its compile. -->
   <PropertyGroup>
     <AssemblyName>AssemblyQuality.Fixtures.Friend</AssemblyName>
+    <SolutionFriendGrants>false</SolutionFriendGrants>
     <BuildTimestamp>20270101000000</BuildTimestamp>
   </PropertyGroup>
 </Project>

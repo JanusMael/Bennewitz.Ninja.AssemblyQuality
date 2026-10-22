@@ -1,3 +1,4 @@
+using System.Reflection;
 using Bennewitz.Ninja.AssemblyQuality;
 using Bennewitz.Ninja.AssemblyQuality.Rules;
 using Xunit;
@@ -55,11 +56,17 @@ public sealed class FriendGrantTests
         Assert.Equal(0, result.Inspected);
     }
 
-    /// <summary>An assembly that grants nothing has nothing to check.</summary>
+    /// <summary>
+    /// <para>An assembly that grants nothing has nothing to check.</para>
+    /// <para>⚠ <b>The subject is a fixture, not the library.</b> AssemblyQuality itself grants to every
+    /// assembly this repository builds, under the family's solution-wide grants; the fixtures opt
+    /// out, so <c>Orphan</c> declares none.</para>
+    /// </summary>
     [Fact]
     public void AnAssemblyWithNoGrants_InspectsNothing()
     {
-        AssemblyRuleResult result = new FriendGrantRule([Solution]).Analyze(AssemblyScanContext.Of(typeof(IAssemblyRule).Assembly));
+        Assembly orphan = Assembly.LoadFrom(Path.Combine(AppContext.BaseDirectory, "orphan", "AssemblyQuality.Fixtures.Orphan.dll"));
+        AssemblyRuleResult result = new FriendGrantRule([Solution]).Analyze(AssemblyScanContext.Of(orphan));
 
         Assert.Empty(result.Findings);
         Assert.Equal(0, result.Inspected);
