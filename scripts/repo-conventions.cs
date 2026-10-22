@@ -144,6 +144,7 @@ return verb switch
 int Check()
 {
     Documentation.Check(tree, config, findings);
+    Workflows.CheckPublishing(tree, findings);
 
     if (offline)
     {
@@ -470,8 +471,7 @@ sealed record Config(
     IReadOnlyList<string> RequiredChecks,
     IReadOnlyList<string> Content,
     IReadOnlyDictionary<string, string> Undocumented,
-    IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> PropsExempt,
-    bool TrimmingRequired)
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> PropsExempt)
 {
     public static Config Parse(string text, bool publishes, List<Finding> findings)
     {
@@ -517,10 +517,11 @@ sealed record Config(
             propsExempt[project] = exempt;
         }
 
-        string trimming = json["trimming"]?.GetValue<string>() ?? "";
-        if (trimming is not ("" or "required"))
+        // Retired by plans/00008: a repository trims when its projects say so, and two sources of
+        // truth could disagree. A NOTE, so a repository that still carries it does not go red.
+        if (json.ContainsKey("trimming"))
         {
-            findings.Add(Finding.Fail("repository.json", $"\"trimming\" is \"{trimming}\"; it is \"required\", or absent while a repository works towards it."));
+            findings.Add(Finding.Note("repository.json", "\"trimming\" is no longer read; remove it. A repository trims when one of its projects sets a trimming property."));
         }
 
         return new Config(
@@ -530,8 +531,7 @@ sealed record Config(
             Strings(json["requiredChecks"]),
             [.. Strings(json["content"]).Select(p => p.TrimEnd('/') + "/")],
             undocumented,
-            propsExempt,
-            trimming == "required");
+            propsExempt);
     }
 
     private static string[] Strings(JsonNode? node) =>
@@ -652,6 +652,41 @@ static class Workflows
             }
         }
     }
+
+    /// <summary>
+    /// A release publishes the ids <c>packages.push</c> names, each by its exact file, never a
+    /// <c>*.nupkg</c> glob: a glob publishes whatever the build happened to produce, and a nuget.org
+    /// version is permanent. A FAIL at every depth, so the release preflight stops before the push.
+    /// </summary>
+    /// <remarks>
+    /// ⚠ Read per workflow, not per step. A workflow that publishes, by <c>nuget push</c> or by a GitHub
+    /// release, may not glob a package anywhere, so a glob in a folded or continued command line, or
+    /// in an action's <c>files:</c>, is caught too. A workflow that publishes nothing may: CI listing
+    /// <c>./artifacts/*.nupkg</c> ships nothing. Comment lines are skipped.
+    /// </remarks>
+    public static void CheckPublishing(Tree tree, List<Finding> findings)
+    {
+        foreach (string path in tree.Files.Where(IsWorkflow))
+        {
+            string[] lines = (tree.Read(path) ?? "").Split('\n');
+            if (!lines.Any(line => !IsComment(line) && Publishes.IsMatch(line)))
+            {
+                continue;
+            }
+            for (int i = 0; i < lines.Length; i++)
+            {
+                if (!IsComment(lines[i]) && PackageGlob.Match(lines[i]) is { Success: true } glob)
+                {
+                    findings.Add(Finding.Fail("release", $"{path}:{i + 1} publishes a package glob, `{glob.Value}`. A release publishes the ids packages.push names, each by its exact file; a glob publishes whatever the build produced, and a nuget.org version is permanent."));
+                }
+            }
+        }
+    }
+
+    private static readonly Regex Publishes = new(@"\bnuget\s+push\b|\bgh\s+release\s+(create|upload)\b|action-gh-release");
+    private static readonly Regex PackageGlob = new(@"[^\s""'()]*[*?][^\s""'()]*\.s?nupkg\b");
+
+    private static bool IsComment(string line) => line.TrimStart().StartsWith('#');
 
     private static bool IsWorkflow(string path) =>
         path.StartsWith(".github/workflows/", StringComparison.Ordinal) &&
@@ -893,7 +928,7 @@ static class Projects
         "ManagePackageVersionsCentrally", "GenerateAutoVersionedAssemblyInfo", "AssemblyCompany",
         "IsContinuousIntegration", "IsPackable", "OutputType", "IsTestProject", "PackAsTool",
         "IsRoslynComponent", "PackageType", "Authors", "PackageLicenseExpression", "RepositoryUrl",
-        "PackageReadmeFile", "DebugType", "IsTrimmable", "EnableTrimAnalyzer",
+        "PackageReadmeFile", "DebugType", .. Trimming.Properties,
         "AssemblyName", Grants.OptOut,
     ];
 
@@ -1072,6 +1107,33 @@ static class Projects
     }
 }
 
+/// <summary>
+/// Whether a repository trims (plans/00008): when any of its projects, of any role, evaluates one of
+/// <see cref="Properties"/> to true. An app published trimmed or natively trims its own libraries too.
+/// </summary>
+/// <remarks>
+/// ⛔ One predicate for both sides of the enforcement: the repository's own libraries here, and the
+/// <c>Bennewitz.Ninja.*</c> packages in its restore graph. Two predicates could disagree about whether
+/// the same repository trims.
+/// </remarks>
+static class Trimming
+{
+    public static readonly string[] Properties = ["IsTrimmable", "EnableTrimAnalyzer", "PublishTrimmed", "PublishAot"];
+
+    public static bool Trims(IReadOnlyList<Evaluated> projects) => Reasons(projects).Count > 0;
+
+    /// <summary>Each project that makes the repository trim, with the properties that do; empty when it does not.</summary>
+    public static IReadOnlyList<string> Reasons(IReadOnlyList<Evaluated> projects) =>
+        [.. projects
+            .Select(e => (e.Name, Set: Properties.Where(p => e.Value(p) == "true").ToArray()))
+            .Where(e => e.Set.Length > 0)
+            .Select(e => $"{e.Name}: {string.Join(", ", e.Set)}")];
+
+    /// <summary>The reasons for a finding: the first three, and how many more.</summary>
+    public static string Describe(IReadOnlyList<string> reasons) =>
+        string.Join("; ", reasons.Take(3)) + (reasons.Count > 3 ? $"; and {reasons.Count - 3} more" : "");
+}
+
 static class Props
 {
     public const string AutoVersioningFloor = "2026.3.916";
@@ -1085,6 +1147,7 @@ static class Props
         }
 
         IReadOnlyDictionary<string, string> none = new Dictionary<string, string>();
+        IReadOnlyList<string> trimmedBy = Trimming.Reasons(projects);
         List<string> roles = [];
         foreach (Evaluated evaluated in projects)
         {
@@ -1094,7 +1157,7 @@ static class Props
             roles.Add($"{name} ({role})");
             IReadOnlyDictionary<string, string> exempt = config?.PropsExempt.GetValueOrDefault(name) ?? none;
 
-            foreach ((string rule, string? problem) in Rules(properties, evaluated.Debug, evaluated.Items, role, repoName))
+            foreach ((string rule, string? problem) in Rules(properties, evaluated.Debug, evaluated.Items, role, repoName, trimmedBy))
             {
                 if (problem is null)
                 {
@@ -1108,22 +1171,14 @@ static class Props
                     findings.Add(Finding.Fail("props", $"{name} ({role}): {problem}"));
                 }
             }
-
-            if (role == "library" && !(Value(properties, "IsTrimmable") == "true" && Value(properties, "EnableTrimAnalyzer") == "true")
-                && !exempt.ContainsKey("Trimming"))
-            {
-                string message = $"{name} is not yet trimmable: it needs IsTrimmable and EnableTrimAnalyzer, as the template's src/Directory.Build.props sets them.";
-                findings.Add(config?.TrimmingRequired == true
-                    ? Finding.Fail("props", message + " repository.json requires trimming.")
-                    : Finding.Note("props", message + " repository.json's \"trimming\": \"required\" makes this fail."));
-            }
         }
 
         findings.Add(Finding.Note("props", $"{projects.Count} projects evaluated after a restore, as CI evaluates them: {string.Join(", ", roles)}."));
     }
 
     /// <summary>Every rule for this role, each with its problem, or null where the project meets it.</summary>
-    private static IEnumerable<(string Rule, string? Problem)> Rules(JsonObject p, JsonObject? debug, JsonNode? items, string role, string? repoName)
+    private static IEnumerable<(string Rule, string? Problem)> Rules(JsonObject p, JsonObject? debug, JsonNode? items, string role, string? repoName,
+        IReadOnlyList<string> trimmedBy)
     {
         string frameworks = Value(p, "TargetFrameworks") is { Length: > 0 } many ? many : Value(p, "TargetFramework");
         string[] targets = frameworks.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -1169,6 +1224,16 @@ static class Props
             yield return ("DebugSymbols", debug is null || debugType is "portable" or "embedded"
                 ? null
                 : $"builds Debug with DebugType \"{debugType}\", so no symbols; the family's are \"portable\" (a .pdb beside the assembly) or \"embedded\".");
+        }
+
+        // Libraries only (plans/00008): a tool runs on the installed framework, an app's trimming is
+        // decided by its kind. A repository that does not trim holds no library to it, so an
+        // exemption there is stale too.
+        if (role == "library")
+        {
+            yield return ("Trimming", trimmedBy.Count == 0 || (Value(p, "IsTrimmable") == "true" && Value(p, "EnableTrimAnalyzer") == "true")
+                ? null
+                : $"is not trimmable, and the repository trims ({Trimming.Describe(trimmedBy)}): every library needs IsTrimmable and EnableTrimAnalyzer, as the template's src/Directory.Build.props sets them.");
         }
 
         if (role is not ("library" or "tool"))
