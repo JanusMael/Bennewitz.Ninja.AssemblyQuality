@@ -6,6 +6,7 @@
        incremental build make version one the newer. -->
   <PropertyGroup>
     <AssemblyName>AssemblyQuality.Fixtures.Versioned</AssemblyName>
+    <SolutionFriendGrants>false</SolutionFriendGrants>
     <BuildTimestamp>20260101000000</BuildTimestamp>
   </PropertyGroup>
 </Project>

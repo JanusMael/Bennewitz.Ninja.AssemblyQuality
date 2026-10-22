@@ -3,6 +3,7 @@
        BuildTimestamp is pinned so version one stays older than FriendV2, which shares its name. -->
   <PropertyGroup>
     <AssemblyName>AssemblyQuality.Fixtures.Friend</AssemblyName>
+    <SolutionFriendGrants>false</SolutionFriendGrants>
     <BuildTimestamp>20260101000000</BuildTimestamp>
   </PropertyGroup>
 </Project>

@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>AssemblyQuality.Fixtures.Dependent</AssemblyName>
+    <SolutionFriendGrants>false</SolutionFriendGrants>
   </PropertyGroup>
 
   <ItemGroup>
