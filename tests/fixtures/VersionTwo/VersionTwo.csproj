@@ -4,6 +4,7 @@
        load context of its own, as an application that picked up the newer release would. -->
   <PropertyGroup>
     <AssemblyName>AssemblyQuality.Fixtures.Versioned</AssemblyName>
+    <SolutionFriendGrants>false</SolutionFriendGrants>
     <BuildTimestamp>20270101000000</BuildTimestamp>
   </PropertyGroup>
 </Project>

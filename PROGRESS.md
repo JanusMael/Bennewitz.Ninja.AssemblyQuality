@@ -2,9 +2,13 @@
 
 ## Next release
 
-Nothing unreleased since `v2026.3.929`. The version comes from the tag, set from the date when the
+Unreleased since `v2026.3.929`. The version comes from the tag, set from the date when the
 maintainer gives the go; see [docs/publishing.md](docs/publishing.md). One release per calendar day,
 three-part `YYYY.Q.MMDD`: a fourth part is AutoVersioning's `HHmm` build stamp, not a patch counter.
+
+| Commit or PR | Change |
+|---|---|
+| (this PR) | build: Templates' solution-wide friend grants (`plans/00006`). The library and the tests compile the generated `AssemblyInfo.InternalsVisibleTo.cs`, linked from a new root `Directory.Build.targets`, so the shipped `AssemblyQuality.dll` grants its internals to the repository's own nine assembly names. Every fixture opts out. `scripts/repo-conventions.cs` is Templates' current copy |
 
 ## Next
 
@@ -14,12 +18,15 @@ generated, linked `AssemblyInfo.InternalsVisibleTo.cs`, the hand-written Externa
 per-project `SolutionFriendGrants=false` opt-out and the conventions checks; and `bbavalonia` calls
 `BNAQ1005`. What remains here, in order:
 
-1. **Adopt `00006`**: take Templates' current `scripts/repo-conventions.cs`, generate the grants file
-   with its `grants` verb, and link both files the way `bbpkg` does. The `Granting`, `FriendV1` and
-   `FriendV2` fixtures set `SolutionFriendGrants` to `false`, since their grants are wrong or withdrawn
-   on purpose; check whether `Orphan`, `Absent`, `Dependent` and the `Version*` fixtures are better
-   opted out too. Read Templates' "Drift from `plans/00006`" in its `PROGRESS.md` first.
-2. **A later Templates plan** sets the provider-side `BNAQ1006` convention: which repositories declare
+1. **Adopt `00006`**: done in this change. **Every fixture opts out**, not only `Granting`, `FriendV1`
+   and `FriendV2`, whose grants are wrong or withdrawn on purpose: a fixture's compiled metadata is
+   what a test reads, and a grant no test planted is noise in it. `FriendGrantTests`' no-grants case
+   moved from the library, which now grants, to the `Orphan` fixture. Read from the built assemblies:
+   the library carries nine grants, `Granting` only its own four, `Orphan` none.
+2. **Templates `plans/00009`** (approved 2026-10-22) moves this repository into
+   `Bennewitz.Ninja.Inspections`, grown from XamlQuality's, once Templates ships multi-family
+   support; this repository is then archived with a pointer. Weigh any large change here against it.
+3. **A later Templates plan** sets the provider-side `BNAQ1006` convention: which repositories declare
    their published consumers, and where the release check lives. The wiring it builds on is in the
    README's `BNAQ1006` section. Nothing to do here until it exists.
 
