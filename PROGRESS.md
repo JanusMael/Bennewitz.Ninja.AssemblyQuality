@@ -8,7 +8,7 @@ three-part `YYYY.Q.MMDD`: a fourth part is AutoVersioning's `HHmm` build stamp, 
 
 | Commit or PR | Change |
 |---|---|
-| (this PR) | build: Templates' solution-wide friend grants (`plans/00006`). The library and the tests compile the generated `AssemblyInfo.InternalsVisibleTo.cs`, linked from a new root `Directory.Build.targets`, so the shipped `AssemblyQuality.dll` grants its internals to the repository's own nine assembly names. Every fixture opts out. `scripts/repo-conventions.cs` is Templates' current copy |
+| #17 | build: Templates' solution-wide friend grants (`plans/00006`). The library and the tests compile the generated `AssemblyInfo.InternalsVisibleTo.cs`, linked from a new root `Directory.Build.targets`, so the shipped `AssemblyQuality.dll` grants its internals to the repository's own nine assembly names. Every fixture opts out. `scripts/repo-conventions.cs` is Templates' current copy |
 
 ## Next
 
