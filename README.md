@@ -1,5 +1,13 @@
 # Bennewitz.Ninja.AssemblyQuality
 
+> **This repository has moved, and is archived.** Bennewitz.Ninja.AssemblyQuality is developed in
+> [Bennewitz.Ninja.Inspections](https://github.com/JanusMael/Bennewitz.Ninja.Inspections) since
+> 2026-10-26, beside XamlQuality and CodeQuality, with this repository's whole history. Its README
+> is [docs/assemblyquality.md](https://github.com/JanusMael/Bennewitz.Ninja.Inspections/blob/main/docs/assemblyquality.md)
+> there. The package id is unchanged; its releases are tagged `assemblyquality/vYYYY.Q.MMDD` there.
+> Issues and pull requests go there. This README is kept as it was below, since released packages
+> link to its rule sections.
+
 Static analysis rules for the shape a .NET assembly **ships** — read by reflection over the
 compiled output, which is the thing a consumer actually binds against. A source analyser sees what
 was written; this sees what was published.
